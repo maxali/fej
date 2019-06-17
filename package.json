@@ -1,0 +1,43 @@
+{
+  "name": "fej",
+  "version": "1.0.0",
+  "description": "Fetch API with middlewares",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "lint": "tslint --project \"./tsconfig.json\"",
+    "docs": "typedoc --out docs src",
+    "gh-pages": "rimraf docs && npm run docs && gh-pages -d docs",
+    "test": "mocha --reporter spec"
+  },
+  "keywords": [
+    "Fetch"
+  ],
+  "author": "maxali",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.0.8",
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4",
+    "rimraf": "^2.6.3",
+    "tslint": "^5.17.0",
+    "typedoc": "^0.14.2",
+    "typescript": "^3.5.2"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maxali/fej.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maxali/fej/issues"
+  },
+  "homepage": "https://github.com/maxali/fej#readme"
+}
