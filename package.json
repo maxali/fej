@@ -1,6 +1,6 @@
 {
   "name": "fej",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fetch API with middlewares",
   "main": "dist/index.js",
   "scripts": {
@@ -9,6 +9,7 @@
     "lint": "tslint --project \"./tsconfig.json\"",
     "docs": "typedoc --out docs src",
     "gh-pages": "rimraf docs && npm run docs && gh-pages -d docs",
+    "prepublish": "npm run lint && npm run test && npm run build",
     "test": "mocha --reporter spec"
   },
   "keywords": [
@@ -36,6 +37,9 @@
     "type": "git",
     "url": "git+https://github.com/maxali/fej.git"
   },
+  "files": [
+    "dist"
+  ],
   "bugs": {
     "url": "https://github.com/maxali/fej/issues"
   },
