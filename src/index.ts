@@ -11,15 +11,13 @@ class Fej {
     input: RequestInfo,
     init?: RequestInit
   ): Promise<Response> => {
-    // merge setInit initializations
-    let _init = this.mergeDeep(Fej.globalInit, init);
 
     // merge non-async middleWares
-    _init = this.mergeNonAsyncMiddlewares(_init);
+    let _init = this.mergeNonAsyncMiddlewares(init);
 
     _init = await this.mergeAsyncMiddlewares(_init);
 
-    return fetch(input, _init);
+    return fetch(input, Object.assign({}, Fej.globalInit, _init));
   }
 
   public setInit = (init: RequestInit) => {
