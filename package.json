@@ -1,6 +1,6 @@
 {
   "name": "fej",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Fetch API with middlewares",
   "main": "dist/index.js",
   "scripts": {
