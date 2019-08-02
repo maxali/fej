@@ -87,5 +87,7 @@ class Fej {
 
 const mFej = new Fej();
 export const fej = mFej.fej;
-export const setInit = mFej.setInit;
+export const addMiddleware = mFej.addMiddleware;
+export const addAsyncMiddleware = mFej.addAsyncMiddleware;
+
 export default mFej;
