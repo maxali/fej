@@ -5,12 +5,20 @@ fej exposes simple middleware API to manipulate request properties.
 
 You can override middleware and initial data with each request: `fej("/api/users", { headers: {"Accept": "application/xml"} })`
 
-#### Fej.setInit
+# Install
+```bash
+  npm install fej
+```
+
+# Usage
+See following usage examples
+
+## Fej.setInit
 Set some static headers
 
 ```javascript
   import Fej from "fej";
-  
+
   Fej.setInit({
     headers: {
       "Accept": "application/json",
@@ -19,13 +27,13 @@ Set some static headers
   });
 ```
 
-#### Fej.addAsyncMiddleware
+## Fej.addAsyncMiddleware
 Updating `fetch` properties asynchronously
 ```javascript
   import Fej from "fej";
 
   Fej.addAsyncMiddleware(async init => {
-  
+
     // get access token
     const token = await authService.acquireTokenSilent();
 
@@ -37,12 +45,12 @@ Updating `fetch` properties asynchronously
 ```
 
 
-#### Fej.addMiddleware
+## Fej.addMiddleware
 ```javascript
   import Fej from "fej";
 
   Fej.addAsyncMiddleware(async init => {
-  
+
     // Get current time
     const currentDateTime = new Date().toISOString()
 
