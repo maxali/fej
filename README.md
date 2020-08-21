@@ -49,15 +49,15 @@ Updating `fetch` properties asynchronously
 ```javascript
   import Fej from "fej";
 
-  Fej.addAsyncMiddleware(async init => {
+  Fej.addMiddleware(init => {
 
     // Get current time
     const currentDateTime = new Date().toISOString()
 
     // update Authorization header with new access token
-    return Promise.resolve({
+    return {
       headers: { "Z-CURRENTTIME": currentDateTime }
-    });
+    };
   });
 ```
 
