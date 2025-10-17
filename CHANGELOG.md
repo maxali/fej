@@ -161,57 +161,6 @@ All deprecated APIs remain functional with console warnings and will be removed 
 
 ---
 
-## Migration Guide
-
-### Migrating from v1.0.x to v1.1.0
-
-**Quick Summary:**
-
-**Before (v1.0.x):**
-```typescript
-import Fej from 'fej';
-
-Fej.setInit({ headers: { 'X-API-Key': 'key' } });
-Fej.addMiddleware((init) => ({ ...init, mode: 'cors' }));
-Fej.addAsyncMiddleware(async (init) => { /* ... */ });
-
-const response = await Fej.fej('https://api.example.com/data');
-```
-
-**After (v1.1.0):**
-```typescript
-import { createFej } from 'fej';
-
-const api = createFej({
-  headers: { 'X-API-Key': 'key' }
-});
-
-api.use('cors', async (ctx, next) => {
-  ctx.request.init.mode = 'cors';
-  await next();
-});
-
-api.use('auth', async (ctx, next) => {
-  // Async operations supported automatically
-  await next();
-});
-
-const response = await api.fej('https://api.example.com/data');
-```
-
-**Key Changes:**
-1. Use `createFej()` instead of singleton `Fej`
-2. Pass configuration to `createFej()` instead of `setInit()`
-3. Use unified `use()` method instead of `addMiddleware()` and `addAsyncMiddleware()`
-4. Middleware uses `(ctx, next)` pattern instead of returning RequestInit
-
-**Backward Compatibility:**
-- Old APIs still work with deprecation warnings
-- Gradual migration supported
-- No breaking changes in 1.1.0
-
----
-
 ## Development
 
 ### Release Process

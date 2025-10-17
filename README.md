@@ -240,14 +240,6 @@ ISC License - see LICENSE file for details
 
 ---
 
-## 📝 Migrating from v1
-
-If you're upgrading from v1.x, key changes include:
-
-- Use `createFej()` instead of singleton `Fej`
-- Replace `addMiddleware()` and `addAsyncMiddleware()` with unified `use()`
-- Middleware now uses Koa-style `(ctx, next)` instead of returning `RequestInit`
-
 ## ⭐ Support
 
 If you find fej useful, please consider:
