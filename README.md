@@ -22,7 +22,6 @@ fej provides a clean middleware API for the native Fetch API, allowing you to mo
 - **[Migration Guide](./MIGRATION_GUIDE_V2.md)** - Migrating from v1 to v2
 - **[Contributing](./CONTRIBUTING.md)** - How to contribute to the project
 - **[Changelog](./CHANGELOG.md)** - Version history and changes
-- **[Roadmap](./ROADMAP.md)** - Future plans and vision
 
 ## 📦 Installation
 
