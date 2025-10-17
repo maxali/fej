@@ -19,10 +19,8 @@ fej provides a clean middleware API for the native Fetch API, allowing you to mo
 ## 📚 Documentation
 
 - **[API Documentation](https://maxali.github.io/fej/)** - Full API reference with examples
-- **[Migration Guide](./MIGRATION_GUIDE_V2.md)** - Migrating from v1 to v2
 - **[Contributing](./CONTRIBUTING.md)** - How to contribute to the project
 - **[Changelog](./CHANGELOG.md)** - Version history and changes
-- **[Roadmap](./ROADMAP.md)** - Future plans and vision
 
 ## 📦 Installation
 
@@ -241,14 +239,6 @@ ISC License - see LICENSE file for details
 - [Changelog](./CHANGELOG.md)
 
 ---
-
-## 📝 Migrating from v1
-
-If you're upgrading from v1.x, see the [Migration Guide](./MIGRATION_GUIDE_V2.md) for detailed instructions. Key changes:
-
-- Use `createFej()` instead of singleton `Fej`
-- Replace `addMiddleware()` and `addAsyncMiddleware()` with unified `use()`
-- Middleware now uses Koa-style `(ctx, next)` instead of returning `RequestInit`
 
 ## ⭐ Support
 
