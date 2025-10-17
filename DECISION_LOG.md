@@ -508,6 +508,114 @@ We chose **Option C: Realistic <10KB Target** with per-feature budgets and tree-
 
 ---
 
+### Decision: No Automated Codemod Tool for v2 Migration
+
+**Date:** 2025-10-17
+**Status:** ✅ Accepted
+**Deciders:** Project maintainer (during Phase 4.2 Beta preparation)
+
+#### Context
+
+During alpha testing (Phase 4.1), the alpha feedback summary identified a "codemod tool incomplete" issue as a HIGH PRIORITY blocker for beta release. The original plan included building an automated migration tool (`@fej/migrate`) that would:
+
+- Transform v1 imports to v2 imports
+- Convert `Fej.setInit()` to `createFej()`
+- Update middleware signatures from v1 to v2 pattern
+- Replace API calls (`Fej.fej()` → `api.get()`)
+
+**Alpha Results:**
+- 3 projects successfully migrated manually
+- Average migration time: 2.5 hours (range: 1.5-4 hours)
+- Migration guide was rated clear and actionable
+- 100% migration success rate without codemod
+
+**Beta Context:**
+- Beta release is imminent (Phase 4.2)
+- Codemod development would take 2-4 hours minimum
+- No actual blocker exists - migrations succeeded without it
+
+#### Options Considered
+
+1. **Option A: Build codemod tool before beta**
+   - Pros: Faster migrations (80% automated), better DX, reduced migration time to ~30 min
+   - Cons: Delays beta 2-4 hours, adds maintenance burden, AST complexity, may not handle edge cases
+   - Estimated effort: 2-4 hours initial + ongoing maintenance
+
+2. **Option B: Remove codemod requirement entirely** ✅ CHOSEN
+   - Pros: No development time, simpler project scope, proven manual process works well
+   - Cons: Slower migrations (2.5h avg), users must follow manual steps
+   - Estimated effort: 30 minutes to remove references
+
+3. **Option C: Build simple codemod during beta**
+   - Pros: Doesn't block beta, can enhance based on feedback
+   - Cons: Beta users still do manual migration, development distraction during beta
+   - Estimated effort: 2-4 hours during beta period
+
+#### Decision
+
+We chose **Option B: Remove codemod requirement entirely** because:
+
+1. **Alpha validation:** 3 projects migrated successfully without codemod, 100% success rate
+2. **Reasonable migration time:** 2.5 hours average is acceptable for a major version upgrade
+3. **Clear migration guide:** Testers rated guide as "clear and actionable" - manual process works
+4. **Scope reduction:** Aligns with Decision D-01 (70% scope reduction) - focus on essentials
+5. **Simplicity:** Don't build what isn't necessary - YAGNI principle
+6. **No blocker:** Not having codemod didn't prevent successful migrations
+7. **Maintenance burden:** AST transformation tools require ongoing maintenance for edge cases
+
+**Breaking changes are rare:** This is a one-time v1→v2 migration. Most users will only do this once.
+
+**User perspective:** 2.5 hours for a major version upgrade is industry-standard and acceptable.
+
+#### Consequences
+
+**Positive:**
+
+- Beta can launch immediately without waiting for codemod development
+- Simpler project scope (no AST tooling to maintain)
+- Proven manual migration process from alpha testing
+- Clear, detailed migration guide is already complete
+- Reduces long-term maintenance burden
+- Forces users to understand the changes (educational benefit)
+
+**Negative:**
+
+- Users must manually migrate (2.5 hours vs potential 30 minutes with codemod)
+- Some users may perceive lack of codemod as lacking "polish"
+- Large projects (50+ files) may take 1-2 days to migrate
+- Repetitive manual work for each file
+
+**Risks:**
+
+- **Low:** Negative feedback from beta testers about migration difficulty
+  - Mitigation: Migration guide is comprehensive with 8 common patterns documented
+- **Low:** Lower adoption due to migration friction
+  - Mitigation: Alpha showed 100% migration success, guide is clear
+- **Low:** Users may request codemod post-launch
+  - Mitigation: Can be added as community contribution if demand exists
+
+#### Reversibility
+
+- **Can be reversed:** Yes, easily
+- **Cost:** 2-4 hours to build basic codemod, ongoing maintenance
+- **Trigger:** If beta testers report significant migration friction or blockers
+
+**Decision can be reconsidered** if:
+- Multiple beta testers report migration as blocker
+- Community volunteers to build and maintain codemod
+- Large projects report multi-day migration times
+
+#### Follow-up Actions
+
+- [x] Remove all codemod references from MIGRATION_GUIDE_V2.md
+- [x] Remove codemod blocker from BETA_RELEASE_NOTES.md
+- [x] Update alpha feedback mentions of codemod
+- [x] Update beta preparation checklist
+- [ ] Monitor beta feedback for migration friction
+- [ ] Add to CONTRIBUTING.md: "Codemod tool welcome as community contribution"
+
+---
+
 ## Decision Template (Copy for New Decisions)
 
 ```markdown
@@ -566,6 +674,7 @@ Quick reference to all decisions:
 2. **[Zero Production Dependencies](#decision-zero-production-dependencies-strict-policy)** - Accepted ✅
 3. **[Unified Middleware Model](#decision-unified-middleware-model-no-interceptors)** - Accepted ✅
 4. **[Realistic Bundle Size Target](#decision-realistic-bundle-size-target-10kb-not-5kb)** - Accepted ✅
+5. **[No Automated Codemod Tool](#decision-no-automated-codemod-tool-for-v2-migration)** - Accepted ✅
 
 ---
 

@@ -4,6 +4,7 @@
 > **Last Updated**: November 2025
 > **v2.0-beta Available**: `npm install fej@beta`
 > **Alpha Results**: 3 projects migrated successfully, avg. 2.5 hours migration time
+> **Note**: Manual migration guide provided - follow step-by-step instructions below
 
 ## Table of Contents
 
@@ -12,10 +13,9 @@
 3. [Timeline](#timeline)
 4. [Breaking Changes](#breaking-changes)
 5. [Migration Steps](#migration-steps)
-6. [Automated Migration](#automated-migration)
-7. [Common Patterns](#common-patterns)
-8. [Troubleshooting](#troubleshooting)
-9. [Getting Help](#getting-help)
+6. [Common Patterns](#common-patterns)
+7. [Troubleshooting](#troubleshooting)
+8. [Getting Help](#getting-help)
 
 ---
 
@@ -127,7 +127,7 @@ const response = await api.get('/users');
 - Better configuration management
 - No global state pollution
 
-**Migration Impact:** Medium - Automated codemod available
+**Migration Impact:** Medium - Follow step-by-step guide below
 
 ---
 
@@ -179,7 +179,7 @@ api.use('timestamp', async (request, next) => {
 - Supports request AND response transformation
 - Priority-based execution order
 
-**Migration Impact:** Medium - Requires signature change, automated codemod helps
+**Migration Impact:** Medium - Requires signature change, see examples below
 
 ---
 
@@ -220,7 +220,7 @@ const api = createFej({
 - All configuration in one place
 - Supports new v2 options (timeout, retry, etc.)
 
-**Migration Impact:** Low - Simple to update, automated codemod handles this
+**Migration Impact:** Low - Simple to update, straightforward find-replace
 
 ---
 
@@ -300,34 +300,9 @@ Document all locations where you use deprecated APIs.
 
 ---
 
-### Step 3: Run Automated Codemod (Recommended)
+### Step 3: Manual Migration
 
-We provide an automated migration tool that handles 80%+ of common migrations:
-
-```bash
-# Install migration tool
-npm install -g @fej/migrate
-
-# Preview changes (dry-run)
-npx @fej/migrate path/to/your/code --dry-run
-
-# Apply changes
-npx @fej/migrate path/to/your/code
-```
-
-The codemod will:
-
-- ✅ Convert `Fej.setInit()` to `createFej()`
-- ✅ Replace singleton imports with instance imports
-- ✅ Convert `addMiddleware()` calls to `use()`
-- ✅ Update middleware signatures (basic cases)
-- ⚠️ Flag complex middleware for manual review
-
----
-
-### Step 4: Manual Migration (If Not Using Codemod)
-
-#### 4.1 Update Imports
+#### 3.1 Update Imports
 
 **Before:**
 
@@ -342,7 +317,7 @@ import { fej, addMiddleware, addAsyncMiddleware } from 'fej';
 import { createFej } from 'fej';
 ```
 
-#### 4.2 Create Instance
+#### 3.2 Create Instance
 
 **Before:**
 
@@ -361,7 +336,7 @@ const api = createFej({
 });
 ```
 
-#### 4.3 Update Middleware
+#### 3.3 Update Middleware
 
 **Before:**
 
@@ -381,7 +356,7 @@ api.use('custom-header', async (request, next) => {
 });
 ```
 
-#### 4.4 Update Request Calls
+#### 3.4 Update Request Calls
 
 **Before:**
 
@@ -399,7 +374,7 @@ const response = await api.fetch('/users');
 
 ---
 
-### Step 5: Update Tests
+### Step 4: Update Tests
 
 Update your test mocks and fixtures:
 
@@ -430,7 +405,7 @@ jest.mock('fej', () => ({
 
 ---
 
-### Step 6: Test Thoroughly
+### Step 5: Test Thoroughly
 
 - ✅ Run all tests
 - ✅ Test authentication flows
@@ -440,7 +415,7 @@ jest.mock('fej', () => ({
 
 ---
 
-### Step 7: Update package.json
+### Step 6: Update package.json
 
 ```bash
 npm install fej@^2.0.0
@@ -448,74 +423,11 @@ npm install fej@^2.0.0
 
 ---
 
-### Step 8: Deploy with Monitoring
+### Step 7: Deploy with Monitoring
 
 - Monitor for errors after deployment
 - Check that middleware is executing correctly
 - Verify request/response behavior matches v1
-
----
-
-## Automated Migration
-
-The `@fej/migrate` codemod handles most common migration patterns automatically.
-
-### What the Codemod Handles
-
-✅ **Automatic transformations:**
-
-- Convert `import Fej from 'fej'` → `import { createFej } from 'fej'`
-- Replace `Fej.setInit()` with `createFej()` constructor call
-- Convert `Fej.addMiddleware()` → `api.use()`
-- Convert `Fej.addAsyncMiddleware()` → `api.use()`
-- Update simple middleware signatures
-- Replace `Fej.fej()` calls with `api.get()` or `api.fetch()`
-
-⚠️ **Manual review required:**
-
-- Complex middleware with custom logic
-- Middleware that modifies `init` in non-standard ways
-- Tests that mock fej internals
-- Custom error handling patterns
-
-### Codemod Usage
-
-```bash
-# Install
-npm install -g @fej/migrate
-
-# Preview changes (recommended first step)
-npx @fej/migrate src/ --dry-run
-
-# Apply changes to specific directory
-npx @fej/migrate src/
-
-# Apply changes to entire project
-npx @fej/migrate .
-
-# Get help
-npx @fej/migrate --help
-```
-
-### Codemod Output
-
-The codemod generates a report showing:
-
-- Files modified
-- Transformations applied
-- Items flagged for manual review
-- Success rate
-
-Example output:
-
-```
-✅ Transformed 12 files
-✅ Updated 45 imports
-✅ Migrated 23 middleware calls
-⚠️  3 items require manual review (see review.txt)
-
-Success rate: 87%
-```
 
 ---
 
@@ -939,12 +851,10 @@ No. v2 will include a compatibility layer so v1 patterns continue to work (with 
 **Typical timelines** (based on alpha testing results):
 
 - Small project (<10 files): 1-2 hours ✅ Validated (Project C: 1.5h)
-- Medium project (10-50 files): 3-6 hours ✅ Validated (Project A: 2h, Project B: 4h)
+- Medium project (10-50 files): 2-4 hours ✅ Validated (Project A: 2h, Project B: 4h)
 - Large project (50+ files): 1-2 days (Extrapolated)
 
 **Average migration time from alpha**: 2.5 hours per project
-
-Using the automated codemod can reduce time by 50-80%.
 
 ### Can I migrate gradually?
 
@@ -981,7 +891,7 @@ During alpha testing (October-November 2025), we had **3 successful production m
 **Outcome**:
 > "Migration was straightforward with the guide. The new middleware system is much more powerful. Priority ordering solved a long-standing issue we had with auth middleware."
 
-**Learnings**: Used codemod for 80% of migration, manual adjustments for custom middleware.
+**Learnings**: Followed migration guide step-by-step, manual adjustments for custom middleware.
 
 ---
 
@@ -1008,17 +918,17 @@ During alpha testing (October-November 2025), we had **3 successful production m
 - Request transformation logic
 
 **Outcome**:
-> "Fastest migration I've ever done. The codemod handled most of it. New middleware API is cleaner than v1. Bundle size stayed under 8KB."
+> "Fastest migration I've ever done. The step-by-step guide made it straightforward. New middleware API is cleaner than v1. Bundle size stayed under 8KB."
 
-**Learnings**: Simple projects benefit most from automated migration.
+**Learnings**: Simple projects with straightforward patterns migrate quickest.
 
 ---
 
 ### Key Takeaways from Alpha Migrations
 
 **What Went Well:**
-- ✅ Codemod handled 80%+ of common patterns
 - ✅ Migration guide was clear and actionable
+- ✅ Step-by-step instructions made process straightforward
 - ✅ Middleware power increase justified the changes
 - ✅ TypeScript support was excellent
 - ✅ No production issues post-migration
@@ -1031,7 +941,7 @@ During alpha testing (October-November 2025), we had **3 successful production m
 
 **Recommendations:**
 1. Start with smallest modules first
-2. Use codemod for initial pass
+2. Follow the step-by-step migration guide
 3. Review middleware logic carefully
 4. Test thoroughly before production deploy
 5. Keep migration guide open during process

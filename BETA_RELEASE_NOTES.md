@@ -376,15 +376,6 @@ Based on alpha tester feedback, we made **16 documentation improvements**:
 
 ## 📦 Migration Support
 
-### Automated Codemod
-```bash
-# Coming soon! (High priority for beta)
-npm install -g @fej/migrate
-npx @fej/migrate path/to/your/code
-```
-
-**Status**: In development, targeting beta release
-
 ### Migration Guide
 - ✅ Comprehensive guide with 8 common patterns
 - ✅ Side-by-side v1/v2 examples
@@ -393,11 +384,14 @@ npx @fej/migrate path/to/your/code
 - ✅ Success stories from alpha (3 projects)
 
 ### Average Migration Time
+Based on alpha testing with manual migration:
 - Small projects (<10 files): 1-2 hours
 - Medium projects (10-50 files): 2-4 hours
 - Large projects (50+ files): 1-2 days
 
 **Alpha Average**: 2.5 hours per project
+
+The step-by-step migration guide provides clear instructions to make the process straightforward.
 
 ---
 
@@ -457,19 +451,14 @@ npx @fej/migrate path/to/your/code
 
 ## ⚠️ Known Issues
 
-### Beta Blockers (Being Addressed)
-1. **Codemod tool incomplete** - HIGH PRIORITY
-   - Status: In development
-   - ETA: Mid-beta (Week 7)
-
 ### Minor Issues (Will Fix in Beta)
-2. **Documentation**: Some JSDoc links need updating
-3. **Examples**: Need more framework-specific examples
+1. **Documentation**: Some JSDoc links need updating
+2. **Examples**: Need more framework-specific examples
 
 ### Deferred to Post-v2.0
-4. **Middleware groups** - Consider for v2.1
-5. **Built-in retry strategies** - External package planned
-6. **Cache middleware** - External package planned
+3. **Middleware groups** - Consider for v2.1
+4. **Built-in retry strategies** - External package planned
+5. **Cache middleware** - External package planned
 
 **No P0/P1 bugs** at beta release ✅
 
@@ -479,10 +468,10 @@ npx @fej/migrate path/to/your/code
 
 ### Beta Phase (4 weeks)
 - [ ] Gather feedback from 50-100 testers
-- [ ] Complete codemod tool
 - [ ] Fix any critical bugs
 - [ ] Performance optimization
 - [ ] Security audit (self or professional)
+- [ ] Enhance documentation based on feedback
 
 ### Release Candidate (2 weeks)
 - [ ] Feature freeze
