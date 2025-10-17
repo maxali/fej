@@ -127,7 +127,7 @@ describe('Fej - Public API Unit Tests', () => {
       const setInitWarning = warnings.find(w => w.message.includes('setInit'));
       expect(setInitWarning).toBeDefined();
       expect(setInitWarning!.message).toContain('Fej.setInit() is deprecated');
-      expect(setInitWarning!.message).toContain('v2.0');
+      expect(setInitWarning!.message).toContain('future major version');
 
       restore();
     });

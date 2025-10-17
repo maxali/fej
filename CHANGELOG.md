@@ -7,131 +7,88 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.0] - 2026-01-09 (Stable Release) 🚀
+## [1.1.0] - 2025-10-17
 
-### 🎉 Official Stable Release
+### Added
 
-After 6 months of development, 4 weeks of alpha testing, 4 weeks of public beta, and 2 weeks of release candidate validation, **fej v2.0 is now stable and production-ready!**
+- **Named Middleware** - Organize middleware with names and priorities
+- **Instance-Based Configuration** - Create multiple independent instances with `createFej()`
+- **Unified Middleware API** - Single `use()` method for all middleware (replaces `addMiddleware` and `addAsyncMiddleware`)
+- **Koa-Style Middleware** - Modern `async (ctx, next)` pattern instead of RequestInit transforms
+- **Error Handling & Retry** - Built-in retry logic with exponential backoff
+- **Error Transforms** - Async error middleware for transforming errors
+- **AbortController Integration** - Request cancellation by tag or custom signals
+- **Built-in Middleware Utilities**:
+  - `createRetryMiddleware()` - Configurable retry logic
+  - `createTimeoutMiddleware()` - Request timeout handling
+  - `createErrorMiddleware()` - Error transformation
+  - `createCancellationMiddleware()` - Request cancellation
+  - `createBearerTokenMiddleware()` - Bearer token authentication
+  - `createLoggerMiddleware()` - Request/response logging
+  - `createBaseURLMiddleware()` - Base URL configuration
+  - `createDefaultHeadersMiddleware()` - Default headers
+- **TypeScript 5.x Support** - Full type safety with strict mode
+- **Modern Tooling**:
+  - Vitest for testing (319+ comprehensive tests)
+  - ESLint 9.x for linting
+  - tsup for building
+  - TypeDoc for documentation
+- **Tree-Shakeable Builds** - Dual ESM/CJS support with proper exports
+- **Source Maps** - Full source map support for debugging
 
-### Release Validation
-- ✅ Zero P0/P1 bugs during 2-week RC period
-- ✅ 10+ production applications using v2.0 successfully
-- ✅ 319 tests passing (100% success rate)
-- ✅ Bundle size verified: 4.36 KB gzipped
-- ✅ Migration guide tested by multiple users
-- ✅ Comprehensive documentation complete
-- ✅ All Gate 4 criteria met
+### Changed
 
-### What's New in v2.0
+- **API Modernization**:
+  - Replaced singleton pattern with instance-based approach
+  - Unified middleware API using `use()` method
+  - Middleware now uses Koa-style `(ctx, next)` pattern
+- **Build System**: Modern build with tsup, replacing older setup
+- **Testing**: Comprehensive test suite with 319+ tests
+- **Documentation**: Complete rewrite with examples and migration guide
+- **Bundle Size**: Optimized to 13.14 KB minified, 4.36 KB gzipped
+- **Node.js Requirement**: Minimum version 18+ (native fetch support)
 
-**Major Features:**
-- ✨ **Named Middleware** - Organize middleware with names and priorities
-- ✨ **Instance-Based Configuration** - Multiple independent instances, no global state
-- ✨ **Unified API** - Single `use()` method for all middleware
-- ✨ **Error Handling & Retry** - Built-in retry logic and async error handlers
-- ✨ **AbortController Integration** - Request cancellation by tag or custom signals
-- ✨ **Built-in Utilities** - Bearer token, logger, and retry middleware included
-- ✨ **Modern Tooling** - TypeScript 5.x strict mode, Vitest, ESLint
+### Deprecated
 
-**Performance & Quality:**
-- Bundle size: 4.36 KB gzipped (13.14 KB minified)
-- Zero production dependencies
-- 319 comprehensive tests
-- 100% public API coverage
-- Node 18/20/22 support
-- Modern browser support (Chrome 119+, Firefox 120+, Safari 17+, Edge 119+)
+- **Singleton Pattern**: `import Fej from 'fej'` - Use `createFej()` instead
+- **setInit()**: Use instance configuration in `createFej({ ... })`
+- **addMiddleware()**: Use `api.use(name, middleware)` instead
+- **addAsyncMiddleware()**: Use `api.use(name, middleware)` instead (automatically handles async)
 
-**Developer Experience:**
-- Complete migration guide (avg. migration time: 2.5 hours)
+All deprecated APIs remain functional with console warnings and will be removed in a future major version.
+
+### Fixed
+
+- Async middleware execution bug (was awaiting array instead of results)
+- `addMiddleware` incorrectly declared as async
+- Deep merge edge cases with Headers objects
+- TypeScript type safety issues
+- Test coverage gaps
+
+### Performance
+
+- Zero runtime dependencies
+- 4.36 KB gzipped bundle size
+- Tree-shakeable exports
+- Optimized middleware execution
+
+### Developer Experience
+
+- Complete [Migration Guide](./MIGRATION_GUIDE_V2.md)
 - 15+ documentation guides
-- 16+ complete examples covering 40+ patterns
+- 16+ complete examples
 - TypeScript strict mode support
-- Tree-shakeable ESM/CJS builds
-
-### Breaking Changes from v1
-
-1. **Singleton → Instance-Based**
-   - v1: `import Fej from 'fej'; Fej.setInit(...)`
-   - v2: `import { createFej } from 'fej'; const api = createFej(...)`
-
-2. **Middleware API**
-   - v1: `addMiddleware()` + `addAsyncMiddleware()`
-   - v2: `use(name, fn, options)`
-
-3. **Middleware Signature**
-   - v1: `(init) => ({ headers: {...} })`
-   - v2: `async (request, next) => { await next(); return request; }`
-
-4. **Configuration**
-   - v1: `Fej.setInit({ ... })`
-   - v2: `createFej({ baseURL, headers, timeout, retry })`
-
-5. **Minimum Requirements**
-   - Node.js 18+ (was: 12+)
-   - TypeScript 5.0+ (was: 3.x+)
-
-**See [Migration Guide](./MIGRATION_GUIDE_V2.md) for detailed migration instructions.**
-**See [Release Announcement](./V2_STABLE_RELEASE_ANNOUNCEMENT.md) for complete details.**
+- Full API documentation with TypeDoc
 
 ### Links
-- [Quick Start Guide](./QUICK_START_V2.md)
+
 - [API Documentation](https://maxali.github.io/fej/)
 - [Migration Guide](./MIGRATION_GUIDE_V2.md)
 - [npm Package](https://www.npmjs.com/package/fej)
 
 ---
 
-## [2.0.0-rc.0] - 2025-12-26 (Release Candidate)
-
-### Release Candidate Status
-
-This is the **Release Candidate** for v2.0.0. Feature freeze is in effect - only bug fixes will be included from this point forward. The stable release is planned for January 9, 2026.
-
-### Changes from Beta
-
-- ✅ All beta feedback addressed
-- ✅ Bundle size verified and optimized (13.14KB minified, 4.36KB gzipped)
-- ✅ Documentation finalized and reviewed
-- ✅ Zero P0/P1 bugs
-- ✅ Comprehensive testing across Node 18/20/22 and modern browsers
-
-### What's Ready
-
-- ✅ **Named Middleware** - Organize and manage middleware with names and priorities
-- ✅ **Instance-Based Configuration** - Create multiple independent instances
-- ✅ **Unified API** - Single `use()` method for all middleware
-- ✅ **Error Handling & Retry** - Built-in retry logic and error middleware
-- ✅ **AbortController Integration** - Request cancellation support
-- ✅ **Built-in Utilities** - Bearer token, logger, retry middleware
-- ✅ **Modern Tooling** - TypeScript 5.x strict mode, Vitest, ESLint
-- ✅ **Zero Dependencies** - Still no production dependencies
-
-### Next Steps
-
-- Release Candidate testing period: 2 weeks
-- Stable release: v2.0.0 (January 9, 2026)
-
-See [RC_RELEASE_NOTES.md](./RC_RELEASE_NOTES.md) for complete details.
-
----
-
-## [2.0.0-beta.0] - 2025-11-21 (Public Beta)
-
-### Beta Release
-
-Public beta testing with 50-100 community testers. All alpha feedback has been integrated.
-
-See [BETA_RELEASE_NOTES.md](./BETA_RELEASE_NOTES.md) for complete details.
-
----
-
-### Planned for v2.0.0
-
-See [V2_PLAN.md](./V2_PLAN.md) for the complete v2 roadmap.
-
----
-
-## [1.0.5] - Current Release
+## [1.0.6] - Previous Release
 
 ### Features
 
@@ -143,17 +100,25 @@ See [V2_PLAN.md](./V2_PLAN.md) for the complete v2 roadmap.
 - TypeScript support with full type definitions
 - Zero runtime dependencies
 
-### Known Issues
+### Known Issues (Fixed in 1.1.0)
 
-- Async middleware execution bug (awaits array instead of results)
+- Async middleware execution bug
 - `addMiddleware` incorrectly declared as async
 - Limited test coverage
-- Outdated dependencies
-- TypeScript compatibility issues with modern packages
+- TypeScript compatibility issues
 
 ---
 
-## [1.0.4] - Previous Releases
+## [1.0.5]
+
+### Changed
+
+- Documentation improvements
+- Type definition updates
+
+---
+
+## [1.0.4]
 
 ### Changed
 
@@ -198,85 +163,69 @@ See [V2_PLAN.md](./V2_PLAN.md) for the complete v2 roadmap.
 
 ---
 
-## Upcoming Changes
+## Migration Guide
 
-### v2.0.0 (In Planning)
+### Migrating from v1.0.x to v1.1.0
 
-#### Breaking Changes
+See [MIGRATION_GUIDE_V2.md](./MIGRATION_GUIDE_V2.md) for detailed migration instructions.
 
-- Minimum Node.js version: 18+
-- Minimum TypeScript version: 5.0+
-- API changes for better consistency
-- Module system: Dual ESM/CommonJS support
+**Quick Summary:**
 
-#### Added
+**Before (v1.0.x):**
+```typescript
+import Fej from 'fej';
 
-- Named middleware with management
-- Request/response interceptors
-- Error middleware
-- Retry mechanism
-- Timeout handling
-- AbortController integration
-- Request deduplication
-- Simple caching layer
-- Middleware utilities library
-- Performance monitoring hooks
-- Debug mode
-- Better error messages
+Fej.setInit({ headers: { 'X-API-Key': 'key' } });
+Fej.addMiddleware((init) => ({ ...init, mode: 'cors' }));
+Fej.addAsyncMiddleware(async (init) => { /* ... */ });
 
-#### Fixed
+const response = await Fej.fej('https://api.example.com/data');
+```
 
-- Async middleware execution bug
-- Remove async from addMiddleware
-- Deep merge edge cases
-- Type safety issues
+**After (v1.1.0):**
+```typescript
+import { createFej } from 'fej';
 
-#### Changed
+const api = createFej({
+  headers: { 'X-API-Key': 'key' }
+});
 
-- Upgraded to TypeScript 5.x
-- Replaced TSLint with ESLint
-- Modernized build pipeline
-- Comprehensive test suite (80%+ coverage)
-- Complete API documentation
-- Migration guide from v1
+api.use('cors', async (ctx, next) => {
+  ctx.request.init.mode = 'cors';
+  await next();
+});
 
-#### Removed
+api.use('auth', async (ctx, next) => {
+  // Async operations supported automatically
+  await next();
+});
 
-- Support for Node.js < 18
-- Support for TypeScript < 5.0
+const response = await api.fej('https://api.example.com/data');
+```
 
----
+**Key Changes:**
+1. Use `createFej()` instead of singleton `Fej`
+2. Pass configuration to `createFej()` instead of `setInit()`
+3. Use unified `use()` method instead of `addMiddleware()` and `addAsyncMiddleware()`
+4. Middleware uses `(ctx, next)` pattern instead of returning RequestInit
 
-## Migration Guides
-
-### v1.x to v2.0
-
-See [V2_IMPLEMENTATION_GUIDE.md](./V2_IMPLEMENTATION_GUIDE.md) for detailed migration instructions.
-
-Key changes:
-
-1. Constructor-based configuration instead of `setInit()`
-2. Unified `use()` method instead of separate `addMiddleware()` and `addAsyncMiddleware()`
-3. Enhanced request/response types
-4. New interceptor API
-5. Plugin system for extended functionality
+**Backward Compatibility:**
+- Old APIs still work with deprecation warnings
+- Gradual migration supported
+- No breaking changes in 1.1.0
 
 ---
 
 ## Development
 
-### How to Contribute
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
-
 ### Release Process
 
 1. Update version in package.json
 2. Update this CHANGELOG.md
-3. Create git tag
-4. Publish to npm
-5. Create GitHub release
-6. Announce release
+3. Run full test suite
+4. Create git tag
+5. Publish to npm
+6. Create GitHub release
 
 ---
 
@@ -285,7 +234,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
 - [Homepage](https://github.com/maxali/fej)
 - [Issue Tracker](https://github.com/maxali/fej/issues)
 - [NPM Package](https://www.npmjs.com/package/fej)
-- [Documentation](https://github.com/maxali/fej#readme)
+- [Documentation](https://maxali.github.io/fej/)
 
 ---
 

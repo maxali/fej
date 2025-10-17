@@ -1,6 +1,6 @@
 {
   "name": "fej",
-  "version": "2.0.0",
+  "version": "1.1.0",
   "description": "Fetch API with middlewares - Modern, lightweight, zero dependencies. Named middleware, retry logic, AbortController support, and more!",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

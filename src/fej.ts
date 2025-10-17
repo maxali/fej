@@ -127,11 +127,10 @@ export class Fej {
    */
   public setInit = (init: RequestInit): void => {
     console.warn(
-      '[Fej Deprecation Warning] Fej.setInit() is deprecated and will be removed in v2.0.\n' +
+      '[Fej Deprecation Warning] Fej.setInit() is deprecated and will be removed in a future major version.\n' +
         'Use instance-based configuration instead:\n' +
         '  const api = createFej({ baseURL: "...", headers: {...} });\n' +
-        'Learn more: https://github.com/maxali/fej#v2-migration\n' +
-        'v2.0-alpha will be released in approximately 2 months.'
+        'Learn more: https://github.com/maxali/fej#readme'
     );
     Fej.globalInit = init;
   };
@@ -160,11 +159,10 @@ export class Fej {
    */
   public addMiddleware = (fn: IFejMiddleware): void => {
     console.warn(
-      '[Fej Deprecation Warning] Fej.addMiddleware() is deprecated and will be removed in v2.0.\n' +
+      '[Fej Deprecation Warning] Fej.addMiddleware() is deprecated and will be removed in a future major version.\n' +
         'Use the unified api.use() method instead:\n' +
         '  api.use("middleware-name", async (request, next) => { ... });\n' +
-        'Learn more: https://github.com/maxali/fej#v2-migration\n' +
-        'v2.0-alpha will be released in approximately 2 months.'
+        'Learn more: https://github.com/maxali/fej#readme'
     );
     function runMiddleware(_init: RequestInit): RequestInit {
       return fn(_init);
@@ -197,11 +195,10 @@ export class Fej {
    */
   public addAsyncMiddleware = (fn: IFejAsyncMiddleware): void => {
     console.warn(
-      '[Fej Deprecation Warning] Fej.addAsyncMiddleware() is deprecated and will be removed in v2.0.\n' +
+      '[Fej Deprecation Warning] Fej.addAsyncMiddleware() is deprecated and will be removed in a future major version.\n' +
         'Use the unified api.use() method instead (handles both sync and async automatically):\n' +
         '  api.use("middleware-name", async (request, next) => { ... });\n' +
-        'Learn more: https://github.com/maxali/fej#v2-migration\n' +
-        'v2.0-alpha will be released in approximately 2 months.'
+        'Learn more: https://github.com/maxali/fej#readme'
     );
     async function runMiddleware(_init: RequestInit): Promise<RequestInit> {
       return await fn(_init);

@@ -66,13 +66,12 @@ let singletonWarningShown = false;
 const showSingletonWarning = (): void => {
   if (!singletonWarningShown) {
     console.warn(
-      '[Fej Deprecation Warning] The singleton pattern (default export) is deprecated and will be removed in v2.0.\n' +
+      '[Fej Deprecation Warning] The singleton pattern (default export) is deprecated and will be removed in a future major version.\n' +
         'Use instance-based approach instead:\n' +
         '  import { createFej } from "fej";\n' +
         '  const api = createFej({ /* config */ });\n' +
         'This allows multiple isolated instances and better configuration.\n' +
-        'Learn more: https://github.com/maxali/fej#v2-migration\n' +
-        'v2.0-alpha will be released in approximately 2 months.'
+        'Learn more: https://github.com/maxali/fej#readme'
     );
     singletonWarningShown = true;
   }
