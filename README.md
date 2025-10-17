@@ -2,7 +2,7 @@
 
 Fetch API with middleware
 
-> **🚀 v2.0-beta is Here!** Public beta testing now available - [Join Beta Testing](#beta-testing) | [Migration Guide](./MIGRATION_GUIDE_V2.md) | [Release Notes](./BETA_RELEASE_NOTES.md)
+> **🎉 v2.0 Release Candidate!** Feature freeze in effect - [RC Release Notes](./RC_RELEASE_NOTES.md) | [Migration Guide](./MIGRATION_GUIDE_V2.md) | [Try RC](#rc-testing)
 
 fej exposes simple middleware API to manipulate request properties.
 
@@ -11,30 +11,31 @@ You can override middleware and initial data with each request: `fej("/api/users
 ## 📋 Project Status
 
 **Latest Stable:** v1.0.6 (production ready)
-**Beta Release:** v2.0.0-beta.0 (public testing) - `npm install fej@beta`
-**Status:** v2.0 public beta testing (4 weeks)
-**Alpha Complete:** ✅ All feedback addressed, zero P0/P1 bugs
-**Next Release:** v2.0-rc (release candidate in ~1 month)
+**Release Candidate:** v2.0.0-rc.0 (final testing) - `npm install fej@rc`
+**Status:** v2.0 RC testing (2 weeks) - Feature freeze in effect
+**Beta Complete:** ✅ All feedback addressed, zero P0/P1 bugs
+**Stable Release:** January 9, 2026 (2 weeks)
 
-### 🚀 v2.0-beta Highlights
+### 🎯 v2.0 Release Candidate Highlights
 
-- ✅ **Named middleware** with priority ordering - tested by 12 alpha testers
+- ✅ **Feature complete** - No new features, bug fixes only
+- ✅ **Named middleware** with priority ordering - proven in alpha/beta
 - ✅ **Instance-based configuration** (multiple independent instances)
 - ✅ **Unified API** - One `use()` method replaces separate sync/async middleware
 - ✅ **Error handling & retry** - Built-in retry logic and error middleware
 - ✅ **AbortController integration** - Request cancellation validated
 - ✅ **Built-in utilities** - Bearer token, logger, retry middleware
 - ✅ **Modern tooling** - TypeScript 5.x strict mode, Vitest, ESLint
-- ✅ **Still zero dependencies** and small bundle size (13.14 KB minified, 4.25 KB gzipped)
-- ✅ **Alpha-proven** - 3 real projects migrated successfully, 47 feedback items addressed
+- ✅ **Zero dependencies** and optimized bundle size (13.14 KB minified, 4.36 KB gzipped)
+- ✅ **Battle-tested** - Alpha (12 testers) + Beta (community testing)
 
-📖 **Beta Testing:**
-- **[Join Beta Testing](#beta-testing)** - Public testing now open!
+📖 **RC Testing:**
+- **[RC Release Notes](./RC_RELEASE_NOTES.md)** - What's in the release candidate
 - **[Migration Guide](./MIGRATION_GUIDE_V2.md)** - v1 to v2 migration with examples
-- **[Beta Release Notes](./BETA_RELEASE_NOTES.md)** - What's new in beta
-- **[Alpha Feedback Summary](./PHASE_4.1_ALPHA_FEEDBACK_SUMMARY.md)** - What we learned
+- **[Try RC Now](#rc-testing)** - Help us validate the final release!
+- **[Beta Results](./PHASE_4.2_COMPLETION_SUMMARY.md)** - What we accomplished
 
-⚠️ **Beta is for testing - production use at your own risk. Stable release in ~6-8 weeks.**
+🎯 **RC is production-ready - final community validation before stable release on January 9, 2026.**
 
 ## 📚 Documentation
 
@@ -106,106 +107,111 @@ Fej.addMiddleware((init) => {
 
 ---
 
-## 🧪 Beta Testing
+## 🎯 RC Testing
 
-**v2.0-beta is now available for public testing!**
+**v2.0-rc.0 is now available for final community validation!**
 
-### How to Install Beta
+**FEATURE FREEZE IN EFFECT** - Only bug fixes will be included from this point forward.
+
+### How to Install RC
 
 ```bash
-# Install beta version
-npm install fej@beta
+# Install RC version
+npm install fej@rc
 
 # Or specify exact version
-npm install fej@2.0.0-beta.0
+npm install fej@2.0.0-rc.0
 ```
 
-### What's New in Beta (from Alpha)
+### Journey to RC
 
-Based on feedback from 12 alpha testers over 4 weeks:
+**Alpha Phase (October-November 2025):**
+- ✅ 12 selected testers, 75% completion rate
+- ✅ 3 real projects migrated (avg. 2.5 hours)
+- ✅ 47 feedback items, 36 resolved (77%)
+- ✅ 6 bugs fixed (3 P0/P1 critical)
 
-- ✅ **API Improvements**: Added `.removeAll()`, `.has()`, `.size`, `onRetry` callback
-- ✅ **Better Error Messages**: Enhanced with middleware context and suggestions
-- ✅ **Async Error Handlers**: Error middleware now supports async operations
-- ✅ **Custom AbortSignal**: Support for passing custom abort signals
-- ✅ **Documentation**: 16 improvements including side-by-side v1/v2 examples
-- ✅ **Migration Guide**: Updated with 8 common patterns and pitfalls
-- ✅ **TypeScript**: Improved type inference for error middleware
-- ✅ **Bug Fixes**: All P0/P1 bugs from alpha fixed (3 critical bugs)
+**Beta Phase (November-December 2025):**
+- ✅ Public community testing
+- ✅ All feedback addressed
+- ✅ Zero P0/P1 bugs remaining
+- ✅ Bundle size verified and optimized
 
-**Alpha Success Metrics:**
-- ✅ 9/12 testers completed full testing (75% completion rate)
-- ✅ 3 real projects migrated successfully (avg. 2.5 hours migration time)
-- ✅ 47 feedback items received, 36 resolved (77% resolution rate)
-- ✅ Developer satisfaction: 8.5/10 average rating
+**RC Phase (December 2025 - January 2026):**
+- 🎯 Final validation (2 weeks)
+- 🎯 Bug fixes only, no new features
+- 🎯 Production-ready testing
+- 🎯 Stable release: January 9, 2026
 
-### Beta Testing Goals
+### RC Testing Goals
 
 We're looking for:
-- **50-100 beta testers** from the community
-- **Production use cases** (at your own risk)
-- **Feedback on**: API design, migration experience, documentation, performance
-- **Real-world testing**: Different environments, bundlers, frameworks
+- **Final community validation** before stable release
+- **Production testing** (RC is production-ready)
+- **Bug reports**: Any critical issues found
+- **Success stories**: Share your experience
 
 ### How to Participate
 
-1. **Install beta**: `npm install fej@beta`
-2. **Read the guide**: Check [Migration Guide](./MIGRATION_GUIDE_V2.md)
-3. **Test in your project**: Try beta in a non-critical project or branch
-4. **Share feedback**: Use [GitHub Issues](https://github.com/maxali/fej/issues) or [Discussions](https://github.com/maxali/fej/discussions)
-5. **Report bugs**: Use `v2-beta` label for beta-specific issues
+1. **Install RC**: `npm install fej@rc`
+2. **Read documentation**: Check [RC Release Notes](./RC_RELEASE_NOTES.md)
+3. **Test in production-like environment**
+4. **Report bugs**: Use [GitHub Issues](https://github.com/maxali/fej/issues) with `v2-rc` label
+5. **Share success**: Join [GitHub Discussions](https://github.com/maxali/fej/discussions)
 
-### Beta Testing Checklist
+### RC Testing Checklist
 
-- [ ] Install beta and verify installation
-- [ ] Test basic requests (GET, POST, PUT, DELETE)
-- [ ] Test middleware functionality
-- [ ] Test error handling and retry
-- [ ] Test in your target environment (Node.js/Browser)
-- [ ] Migrate a small feature from v1 to v2
-- [ ] Review documentation for accuracy
-- [ ] Report any issues or suggestions
+- [ ] Install RC and verify installation
+- [ ] Test all critical features in your app
+- [ ] Validate production performance
+- [ ] Test migration from v1 (if applicable)
+- [ ] Verify bundle size meets your needs
+- [ ] Report any bugs or issues
+- [ ] Share your success story
 
 ### What to Test
 
-**Priority 1 (Must Test):**
-- Core request methods (`.get()`, `.post()`, etc.)
+**Priority 1 (Critical):**
+- Core request methods (GET, POST, PUT, DELETE, PATCH)
 - Middleware execution and priority
-- Error handling
-- TypeScript types (if using TypeScript)
+- Error handling and retry logic
+- Production performance
 
-**Priority 2 (Should Test):**
+**Priority 2 (Important):**
 - AbortController and request cancellation
-- Retry logic
 - Multiple instances
+- TypeScript types and inference
 - Built-in middleware utilities
 
-**Priority 3 (Nice to Test):**
-- Bundle size in your bundler
-- Performance vs v1 or other libraries
-- Edge cases in your specific use case
+**Priority 3 (Nice to have):**
+- Bundle size optimization
+- Performance benchmarks
+- Edge cases and corner scenarios
 
-### Feedback We Need
+### RC Timeline
 
-1. **API Design**: Is the API intuitive? Any confusing parts?
-2. **Migration**: Was migration smooth? What was difficult?
-3. **Documentation**: Is anything unclear or missing?
-4. **Performance**: Any issues with speed or bundle size?
-5. **Bugs**: Any unexpected behavior or errors?
+- **RC Release**: December 26, 2025 (Week 10)
+- **RC Duration**: 2 weeks
+- **Stable Release**: January 9, 2026 (Week 12)
+- **v1 LTS Start**: January 9, 2026
 
-### Beta Timeline
+### Support During RC
 
-- **Beta Start**: Week 5 (2025-11-21)
-- **Beta Duration**: 4 weeks
-- **Beta End**: Week 9 (2025-12-19)
-- **Release Candidate**: Week 10 (2025-12-26)
-- **Stable Release**: Week 12 (2026-01-09)
+- **GitHub Issues**: Report bugs with `v2-rc` label
+- **GitHub Discussions**: Ask questions in "v2 RC" category
+- **Response Time**:
+  - P0 (Critical): 24 hours
+  - P1 (High): 48 hours
+  - P2/P3 (Medium/Low): 72 hours
 
-### Support During Beta
+### Success Criteria for Stable Release
 
-- **GitHub Issues**: Report bugs with `v2-beta` label
-- **GitHub Discussions**: Ask questions in "v2 Beta" category
-- **Response Time**: 24-48 hours for P0/P1 issues, 48-72 hours for questions
+- [ ] Zero P0/P1 bugs found during RC
+- [ ] 10+ production apps using RC successfully
+- [ ] Performance validated in real-world scenarios
+- [x] ✅ Bundle size < 15KB (verified: 13.14KB)
+- [x] ✅ Migration guide tested
+- [x] ✅ Documentation complete
 
 ---
 

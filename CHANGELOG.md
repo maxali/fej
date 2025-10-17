@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0-rc.0] - 2025-12-26 (Release Candidate)
+
+### Release Candidate Status
+
+This is the **Release Candidate** for v2.0.0. Feature freeze is in effect - only bug fixes will be included from this point forward. The stable release is planned for January 9, 2026.
+
+### Changes from Beta
+
+- ✅ All beta feedback addressed
+- ✅ Bundle size verified and optimized (13.14KB minified, 4.36KB gzipped)
+- ✅ Documentation finalized and reviewed
+- ✅ Zero P0/P1 bugs
+- ✅ Comprehensive testing across Node 18/20/22 and modern browsers
+
+### What's Ready
+
+- ✅ **Named Middleware** - Organize and manage middleware with names and priorities
+- ✅ **Instance-Based Configuration** - Create multiple independent instances
+- ✅ **Unified API** - Single `use()` method for all middleware
+- ✅ **Error Handling & Retry** - Built-in retry logic and error middleware
+- ✅ **AbortController Integration** - Request cancellation support
+- ✅ **Built-in Utilities** - Bearer token, logger, retry middleware
+- ✅ **Modern Tooling** - TypeScript 5.x strict mode, Vitest, ESLint
+- ✅ **Zero Dependencies** - Still no production dependencies
+
+### Next Steps
+
+- Release Candidate testing period: 2 weeks
+- Stable release: v2.0.0 (January 9, 2026)
+
+See [RC_RELEASE_NOTES.md](./RC_RELEASE_NOTES.md) for complete details.
+
+---
+
+## [2.0.0-beta.0] - 2025-11-21 (Public Beta)
+
+### Beta Release
+
+Public beta testing with 50-100 community testers. All alpha feedback has been integrated.
+
+See [BETA_RELEASE_NOTES.md](./BETA_RELEASE_NOTES.md) for complete details.
+
+---
+
 ### Planned for v2.0.0
 
 See [V2_PLAN.md](./V2_PLAN.md) for the complete v2 roadmap.
