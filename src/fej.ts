@@ -109,6 +109,22 @@ export class Fej {
     return fetch(input, _init);
   };
 
+  /**
+   * Set global request initialization options (deprecated)
+   *
+   * This method sets global configuration that applies to all requests made with the singleton.
+   * It is deprecated in favor of instance-based configuration.
+   *
+   * @deprecated This method is deprecated and will be removed in a future version.
+   * Use instance-based configuration instead:
+   * ```typescript
+   * const api = createFej({ baseURL: "...", headers: {...} });
+   * ```
+   *
+   * @param init - Request initialization options to set globally
+   *
+   * @public
+   */
   public setInit = (init: RequestInit): void => {
     console.warn(
       '[Fej Deprecation Warning] Fej.setInit() is deprecated and will be removed in v2.0.\n' +
@@ -120,6 +136,28 @@ export class Fej {
     Fej.globalInit = init;
   };
 
+  /**
+   * Add synchronous middleware (deprecated)
+   *
+   * This method adds a synchronous middleware function using the legacy v1 API.
+   * It is deprecated in favor of the unified `use()` method which supports both
+   * sync and async middleware with better control and naming.
+   *
+   * @deprecated This method is deprecated and will be removed in a future version.
+   * Use the unified `use()` method instead:
+   * ```typescript
+   * api.use("middleware-name", async (ctx, next) => {
+   *   // Modify request
+   *   ctx.request.init.headers = new Headers(ctx.request.init.headers);
+   *   ctx.request.init.headers.set('X-Custom', 'value');
+   *   await next();
+   * });
+   * ```
+   *
+   * @param fn - Legacy synchronous middleware function
+   *
+   * @public
+   */
   public addMiddleware = (fn: IFejMiddleware): void => {
     console.warn(
       '[Fej Deprecation Warning] Fej.addMiddleware() is deprecated and will be removed in v2.0.\n' +
@@ -134,6 +172,29 @@ export class Fej {
     this.middleWares.push(runMiddleware);
   };
 
+  /**
+   * Add asynchronous middleware (deprecated)
+   *
+   * This method adds an asynchronous middleware function using the legacy v1 API.
+   * It is deprecated in favor of the unified `use()` method which handles both
+   * sync and async middleware automatically.
+   *
+   * @deprecated This method is deprecated and will be removed in a future version.
+   * Use the unified `use()` method instead (handles both sync and async automatically):
+   * ```typescript
+   * api.use("middleware-name", async (ctx, next) => {
+   *   // Async operations supported
+   *   const token = await getAuthToken();
+   *   ctx.request.init.headers = new Headers(ctx.request.init.headers);
+   *   ctx.request.init.headers.set('Authorization', `Bearer ${token}`);
+   *   await next();
+   * });
+   * ```
+   *
+   * @param fn - Legacy asynchronous middleware function
+   *
+   * @public
+   */
   public addAsyncMiddleware = (fn: IFejAsyncMiddleware): void => {
     console.warn(
       '[Fej Deprecation Warning] Fej.addAsyncMiddleware() is deprecated and will be removed in v2.0.\n' +
@@ -148,7 +209,16 @@ export class Fej {
     this.asyncMiddleWares.push(runMiddleware);
   };
 
-  // Internal method for testing - clears all middleware
+  /**
+   * Clear all middleware (internal testing helper)
+   *
+   * This method is used internally for testing purposes to reset the middleware state.
+   * It clears all v1 and v2 middleware and optionally resets the singleton warning flag.
+   *
+   * @param resetSingletonWarning - Whether to reset singleton warning flag (default: true)
+   *
+   * @internal
+   */
   public _clearMiddleware = (resetSingletonWarning = true): void => {
     this.middleWares = [];
     this.asyncMiddleWares = [];
@@ -161,7 +231,14 @@ export class Fej {
     }
   };
 
-  // Internal method for testing - resets singleton warning state
+  /**
+   * Reset singleton warning state (internal testing helper)
+   *
+   * This method is used internally for testing purposes to reset the singleton
+   * deprecation warning flag, allowing tests to verify warning behavior.
+   *
+   * @internal
+   */
   public _resetSingletonWarning = (): void => {
     // This will be called from the exported function
   };

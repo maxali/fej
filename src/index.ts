@@ -94,7 +94,14 @@ export const addAsyncMiddleware = (fn: IFejAsyncMiddleware): void => {
   return mFej.addAsyncMiddleware(fn);
 };
 
-// Internal testing helper - clears all middleware
+/**
+ * Clear all middleware (internal testing helper)
+ *
+ * This is an internal testing utility that should not be used in production code.
+ * It clears all middleware and resets the singleton warning state.
+ *
+ * @internal
+ */
 export const _clearMiddleware = (): void => {
   singletonWarningShown = false; // Reset the warning flag
   return mFej._clearMiddleware(false); // Don't call reset again
