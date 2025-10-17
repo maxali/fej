@@ -1,0 +1,15 @@
+{
+  "name": "fej-error-handling-examples",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Error handling examples for fej",
+  "scripts": {
+    "basic-errors": "node basic-errors.js",
+    "retry-logic": "node retry-logic.js",
+    "error-middleware": "node error-middleware.js"
+  },
+  "dependencies": {
+    "fej": "file:../.."
+  }
+}

@@ -1,93 +1,108 @@
-export type IFejMiddleware = (init: RequestInit) => RequestInit;
+// ============================================================
+// Re-export all types
+// ============================================================
+export type {
+  IFejMiddleware,
+  IFejAsyncMiddleware,
+  FejContext,
+  FejMiddlewareFunction,
+  MiddlewareEntry,
+  RetryConfig,
+  TimeoutConfig,
+  RequestConfig,
+  CancellationOptions,
+  ErrorTransform,
+  CancellationMiddlewareConfig,
+  FejConfig,
+} from './types.js';
 
-export type IFejAsyncMiddleware = (init: RequestInit) => Promise<RequestInit>;
+// ============================================================
+// Re-export error classes
+// ============================================================
+export { FejError, FejTimeoutError, FejRetryError } from './errors.js';
 
-class Fej {
-  private static globalInit: RequestInit = {};
-  private middleWares: IFejMiddleware[] = [];
-  private asyncMiddleWares: IFejAsyncMiddleware[] = [];
+// ============================================================
+// Re-export middleware utilities
+// ============================================================
+export {
+  createRetryMiddleware,
+  createTimeoutMiddleware,
+  createErrorMiddleware,
+  createCancellationMiddleware,
+  createBearerTokenMiddleware,
+  createLoggerMiddleware,
+  createBaseURLMiddleware,
+  createDefaultHeadersMiddleware,
+} from './middleware.js';
 
-  public fej = async (
-    input: RequestInfo,
-    init?: RequestInit
-  ): Promise<Response> => {
+// ============================================================
+// Re-export middleware utility types
+// ============================================================
+export type {
+  BearerTokenConfig,
+  LoggerConfig,
+  LoggerFormat,
+  BaseURLConfig,
+  DefaultHeadersConfig,
+} from './middleware.js';
 
-    // merge non-async middleWares
-    let _init = this.mergeNonAsyncMiddlewares(init);
+// ============================================================
+// Re-export Fej class and factory
+// ============================================================
+export { Fej, createFej } from './fej.js';
 
-    _init = await this.mergeAsyncMiddlewares(_init);
+// ============================================================
+// Import for singleton pattern
+// ============================================================
+import { Fej } from './fej.js';
+import type { IFejMiddleware, IFejAsyncMiddleware } from './types.js';
 
-    return fetch(input, Object.assign({}, Fej.globalInit, _init));
-  }
-
-  public setInit = (init: RequestInit) => {
-    Fej.globalInit = init;
-  }
-
-  public addMiddleware = async (fn: IFejMiddleware) => {
-    function runMiddleware(_init: RequestInit) {
-      return fn(_init);
-    }
-    this.middleWares.push(runMiddleware);
-  }
-
-  public addAsyncMiddleware = (fn: IFejAsyncMiddleware) => {
-    async function runMiddleware(_init: RequestInit) {
-      return await fn(_init);
-    }
-    this.asyncMiddleWares.push(runMiddleware);
-  }
-
-  private isObject = (item: any) => {
-    return (
-      item && typeof item === 'object' && !Array.isArray(item) && item !== null
-    );
-  }
-
-  private mergeDeep = (target: any, source: any) => {
-    if (this.isObject(target) && this.isObject(source)) {
-      Object.keys(source).forEach((key) => {
-        if (this.isObject(source[key])) {
-          if (!target[key] || !this.isObject(target[key])) {
-            target[key] = source[key];
-          }
-          this.mergeDeep(target[key], source[key]);
-        } else {
-          Object.assign(target, { [key]: source[key] });
-        }
-      });
-    }
-    return target;
-  }
-
-  private async mergeAsyncMiddlewares(_init: any) {
-    const mdwResults = await Promise.all(this.asyncMiddleWares);
-
-    // run over Promise.all on all asyncMiddleware array
-    await Promise.all(
-      mdwResults.map(async (asyncMiddleware) => {
-        const mdwInit = await asyncMiddleware(_init);
-        _init = this.mergeDeep(_init, mdwInit);
-
-        return _init;
-      })
-    );
-
-    return _init;
-  }
-
-  private mergeNonAsyncMiddlewares(_init: any) {
-    this.middleWares.map((middleware) => {
-      const mdwInit = middleware(_init);
-      _init = this.mergeDeep(_init, mdwInit);
-    });
-    return _init;
-  }
-}
-
+// ============================================================
+// Singleton pattern (deprecated but maintained for backward compatibility)
+// ============================================================
 const mFej = new Fej();
-export const fej = mFej.fej;
-export const addMiddleware = mFej.addMiddleware;
-export const addAsyncMiddleware = mFej.addAsyncMiddleware;
+
+let singletonWarningShown = false;
+const showSingletonWarning = (): void => {
+  if (!singletonWarningShown) {
+    console.warn(
+      '[Fej Deprecation Warning] The singleton pattern (default export) is deprecated and will be removed in v2.0.\n' +
+        'Use instance-based approach instead:\n' +
+        '  import { createFej } from "fej";\n' +
+        '  const api = createFej({ /* config */ });\n' +
+        'This allows multiple isolated instances and better configuration.\n' +
+        'Learn more: https://github.com/maxali/fej#v2-migration\n' +
+        'v2.0-alpha will be released in approximately 2 months.'
+    );
+    singletonWarningShown = true;
+  }
+};
+
+// Wrap singleton exports to show warning on first use
+export const fej = (input: RequestInfo, init?: RequestInit): Promise<Response> => {
+  showSingletonWarning();
+  return mFej.fej(input, init);
+};
+
+export const addMiddleware = (fn: IFejMiddleware): void => {
+  showSingletonWarning();
+  return mFej.addMiddleware(fn);
+};
+
+export const addAsyncMiddleware = (fn: IFejAsyncMiddleware): void => {
+  showSingletonWarning();
+  return mFej.addAsyncMiddleware(fn);
+};
+
+// Internal testing helper - clears all middleware
+export const _clearMiddleware = (): void => {
+  singletonWarningShown = false; // Reset the warning flag
+  return mFej._clearMiddleware(false); // Don't call reset again
+};
+
+// Hook up the reset function
+mFej._resetSingletonWarning = (): void => {
+  singletonWarningShown = false;
+};
 
 export default mFej;

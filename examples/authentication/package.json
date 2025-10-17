@@ -1,0 +1,14 @@
+{
+  "name": "fej-authentication-examples",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Authentication pattern examples for fej",
+  "scripts": {
+    "bearer-token": "node bearer-token.js",
+    "api-key": "node api-key.js"
+  },
+  "dependencies": {
+    "fej": "file:../.."
+  }
+}

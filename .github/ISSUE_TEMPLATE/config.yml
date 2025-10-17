@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: GitHub Discussions
+    url: https://github.com/maxali/fej/discussions
+    about: Ask questions, share ideas, and discuss fej with the community
+  - name: Documentation
+    url: https://maxali.github.io/fej/
+    about: Read the complete API documentation and guides
+  - name: Quick Start Guide
+    url: https://github.com/maxali/fej#readme
+    about: Get started with fej quickly

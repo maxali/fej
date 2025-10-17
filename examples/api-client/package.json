@@ -1,0 +1,13 @@
+{
+  "name": "fej-example-api-client",
+  "version": "1.0.0",
+  "description": "Simple API client example using fej",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "fej": "file:../.."
+  }
+}

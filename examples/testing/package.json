@@ -1,0 +1,16 @@
+{
+  "name": "fej-testing-examples",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Testing strategy examples for fej",
+  "scripts": {
+    "test:mocking": "node mocking-requests.test.js",
+    "test:middleware": "node testing-middleware.test.js",
+    "test:integration": "node integration-testing.test.js",
+    "test": "npm run test:mocking && npm run test:middleware && npm run test:integration"
+  },
+  "dependencies": {
+    "fej": "file:../.."
+  }
+}

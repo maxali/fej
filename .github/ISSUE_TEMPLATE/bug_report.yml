@@ -1,0 +1,147 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in fej
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the information below to help us investigate.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm the following before submitting
+      options:
+        - label: I have searched existing issues to ensure this bug hasn't been reported
+          required: true
+        - label: I have read the [documentation](https://github.com/maxali/fej#readme)
+          required: true
+        - label: I am using the latest version of fej
+          required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: fej Version
+      description: What version of fej are you using?
+      placeholder: "e.g., 1.9.0 or 2.0.0-beta.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: Where are you running fej?
+      multiple: true
+      options:
+        - Browser
+        - Node.js
+        - Deno
+        - Bun
+        - Other (please specify in description)
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js Version (if applicable)
+      description: What version of Node.js are you using?
+      placeholder: "e.g., 20.10.0"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: What happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: What actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Provide detailed steps to reproduce the bug
+      placeholder: |
+        1. Create a fej instance with...
+        2. Call the method...
+        3. Observe the error...
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: code-sample
+    attributes:
+      label: Minimal Reproducible Code
+      description: Provide a minimal code example that reproduces the bug
+      placeholder: |
+        ```typescript
+        import { Fej } from 'fej';
+
+        const fej = new Fej({
+          baseURL: 'https://api.example.com'
+        });
+
+        // Code that reproduces the bug...
+        ```
+      render: typescript
+    validations:
+      required: false
+
+  - type: textarea
+    id: error-message
+    attributes:
+      label: Error Message / Stack Trace
+      description: If applicable, paste the complete error message and stack trace
+      placeholder: Paste error message here...
+      render: shell
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here (screenshots, logs, etc.)
+
+  - type: checkboxes
+    id: workaround
+    attributes:
+      label: Workaround
+      description: Have you found a workaround for this issue?
+      options:
+        - label: I have found a workaround (please describe in additional context)
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Are you willing to help fix this bug?
+      options:
+        - label: I am willing to submit a PR to fix this issue

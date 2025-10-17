@@ -5,6 +5,7 @@ Thank you for your interest in contributing to fej! This document provides guide
 ---
 
 ## Table of Contents
+
 1. [Code of Conduct](#code-of-conduct)
 2. [Getting Started](#getting-started)
 3. [Development Setup](#development-setup)
@@ -19,6 +20,7 @@ Thank you for your interest in contributing to fej! This document provides guide
 ## Code of Conduct
 
 ### Our Pledge
+
 We are committed to providing a welcoming and inclusive experience for everyone. We expect all contributors to:
 
 - Be respectful and considerate
@@ -27,6 +29,7 @@ We are committed to providing a welcoming and inclusive experience for everyone.
 - Show empathy toward other community members
 
 ### Unacceptable Behavior
+
 - Harassment, discrimination, or offensive comments
 - Trolling or insulting/derogatory comments
 - Public or private harassment
@@ -37,6 +40,7 @@ We are committed to providing a welcoming and inclusive experience for everyone.
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18 or higher
 - npm or yarn
 - Git
@@ -50,6 +54,7 @@ We are committed to providing a welcoming and inclusive experience for everyone.
 4. **Feature Requests**: Implement features labeled with `enhancement`
 
 ### Before You Start
+
 - Check if someone is already working on the issue
 - Comment on the issue to claim it
 - Discuss your approach if it's a significant change
@@ -60,6 +65,7 @@ We are committed to providing a welcoming and inclusive experience for everyone.
 ## Development Setup
 
 ### 1. Fork and Clone
+
 ```bash
 # Fork the repository on GitHub, then:
 git clone https://github.com/YOUR_USERNAME/fej.git
@@ -67,42 +73,115 @@ cd fej
 ```
 
 ### 2. Add Upstream Remote
+
 ```bash
 git remote add upstream https://github.com/maxali/fej.git
 ```
 
 ### 3. Install Dependencies
+
 ```bash
 npm install
 ```
 
-### 4. Build the Project
+### 4. Verify the Setup
+
+```bash
+# Type check
+npm run type-check
+
+# Lint code
+npm run lint
+
+# Run tests
+npm test
+
+# Check test coverage (should be >90%)
+npm run test:coverage
+```
+
+### 5. Build the Project (Optional)
+
+**Note**: You don't need to build for development. Only build when you want to test the production bundle.
+
 ```bash
 npm run build
 ```
 
-### 5. Run Tests
+### Development Workflow
+
+#### Watch Mode for Tests
+
 ```bash
-npm test
+npm run test:watch
 ```
 
-### 6. Verify Everything Works
+#### Auto-formatting
+
 ```bash
-npm run lint
-npm run typecheck
-npm run test:coverage
+# Format all code
+npm run format
+
+# Check if code is formatted
+npm run format:check
 ```
+
+#### Before Committing
+
+```bash
+# Run all checks
+npm run lint && npm run type-check && npm test
+```
+
+### Project Structure
+
+```
+fej/
+├── src/
+│   ├── index.ts          # Main export file
+│   ├── fej.ts            # Core Fej class
+│   ├── middleware.ts     # Middleware utilities
+│   ├── errors.ts         # Custom error classes
+│   └── types.ts          # TypeScript type definitions
+├── test/
+│   ├── unit/             # Unit tests
+│   ├── integration/      # Integration tests
+│   ├── performance/      # Performance tests
+│   └── utils/            # Test utilities
+├── examples/             # Example implementations
+├── docs/                 # Generated API documentation
+└── dist/                 # Build output (git-ignored)
+```
+
+### Available Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run build` | Build production bundle with tsup |
+| `npm run build:watch` | Build in watch mode |
+| `npm run type-check` | Run TypeScript type checking |
+| `npm run lint` | Lint code with ESLint |
+| `npm run lint:fix` | Auto-fix linting issues |
+| `npm run format` | Format code with Prettier |
+| `npm run format:check` | Check code formatting |
+| `npm test` | Run all tests once |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Run tests with coverage report |
+| `npm run check:size` | Check bundle size |
+| `npm run docs` | Generate TypeDoc documentation |
+| `npm run clean` | Remove build artifacts |
 
 ---
 
 ## Making Changes
 
 ### 1. Create a Branch
+
 ```bash
 # Sync with upstream
 git fetch upstream
-git checkout main
-git merge upstream/main
+git checkout master
+git merge upstream/master
 
 # Create your feature branch
 git checkout -b feature/your-feature-name
@@ -110,7 +189,10 @@ git checkout -b feature/your-feature-name
 git checkout -b fix/issue-number-description
 ```
 
+**Note**: The main branch is called `master` in this repository.
+
 ### Branch Naming Convention
+
 - `feature/` - New features
 - `fix/` - Bug fixes
 - `docs/` - Documentation changes
@@ -121,6 +203,7 @@ git checkout -b fix/issue-number-description
 ### 2. Make Your Changes
 
 #### For Code Changes
+
 - Follow the existing code style
 - Write/update tests for your changes
 - Ensure all tests pass
@@ -128,6 +211,7 @@ git checkout -b fix/issue-number-description
 - Add comments for complex logic
 
 #### For Documentation Changes
+
 - Use clear, concise language
 - Include examples where helpful
 - Check for spelling and grammar
@@ -136,6 +220,7 @@ git checkout -b fix/issue-number-description
 ### 3. Commit Your Changes
 
 #### Commit Message Format
+
 ```
 <type>(<scope>): <subject>
 
@@ -145,6 +230,7 @@ git checkout -b fix/issue-number-description
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation only
@@ -154,6 +240,7 @@ git checkout -b fix/issue-number-description
 - `chore`: Maintenance tasks
 
 **Example:**
+
 ```
 feat(middleware): add retry middleware
 
@@ -164,10 +251,11 @@ Closes #123
 ```
 
 ### 4. Keep Your Branch Updated
+
 ```bash
 # Regularly sync with upstream
 git fetch upstream
-git rebase upstream/main
+git rebase upstream/master
 ```
 
 ---
@@ -175,6 +263,7 @@ git rebase upstream/main
 ## Submitting Changes
 
 ### 1. Run Pre-submission Checks
+
 ```bash
 # Lint your code
 npm run lint
@@ -193,6 +282,7 @@ npm run build
 ```
 
 ### 2. Push Your Branch
+
 ```bash
 git push origin feature/your-feature-name
 ```
@@ -212,12 +302,14 @@ git push origin feature/your-feature-name
 ### 4. PR Review Process
 
 #### What Happens Next
+
 - Automated tests run (CI/CD)
 - Code review by maintainers
 - Feedback and requested changes
 - Approval and merge
 
 #### Responding to Feedback
+
 - Address all review comments
 - Push additional commits if needed
 - Mark conversations as resolved
@@ -230,6 +322,7 @@ git push origin feature/your-feature-name
 ### TypeScript Guidelines
 
 #### Type Safety
+
 ```typescript
 // ✅ Good: Explicit types
 function processRequest(request: FejRequest): Promise<FejResponse> {
@@ -243,6 +336,7 @@ function processRequest(request: any): Promise<any> {
 ```
 
 #### Naming Conventions
+
 - **Classes**: PascalCase (`class FejRequest`)
 - **Functions**: camelCase (`function deepMerge()`)
 - **Constants**: UPPER_SNAKE_CASE (`const MAX_RETRIES`)
@@ -250,30 +344,33 @@ function processRequest(request: any): Promise<any> {
 - **Type Aliases**: PascalCase (`type Middleware`)
 
 #### File Structure
+
 ```typescript
 // 1. Imports
 import { something } from './somewhere';
 
 // 2. Types and interfaces
-export interface Config { }
+export interface Config {}
 
 // 3. Constants
 const DEFAULT_TIMEOUT = 5000;
 
 // 4. Main code
-export class Fej { }
+export class Fej {}
 
 // 5. Helper functions (if private)
-function helper() { }
+function helper() {}
 ```
 
 ### Code Style
 
 #### Use Prettier
+
 - Format automatically with `npm run format`
 - Configuration in `.prettierrc`
 
 #### ESLint Rules
+
 - No console logs (use debug mode)
 - No unused variables
 - Explicit return types for public functions
@@ -282,14 +379,15 @@ function helper() { }
 ### Documentation
 
 #### JSDoc Comments
-```typescript
+
+````typescript
 /**
  * Register a middleware function
- * 
+ *
  * @param middleware - The middleware function to register
  * @param config - Optional middleware configuration
  * @returns A unique identifier for the middleware
- * 
+ *
  * @example
  * ```typescript
  * const id = fej.use((req, next) => {
@@ -301,13 +399,14 @@ function helper() { }
 use(middleware: Middleware, config?: MiddlewareConfig): symbol {
   // ...
 }
-```
+````
 
 ---
 
 ## Testing Guidelines
 
 ### Test Structure
+
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
 
@@ -316,14 +415,14 @@ describe('FeatureName', () => {
     it('should do something specific', () => {
       // Arrange
       const input = setupTest();
-      
+
       // Act
       const result = performAction(input);
-      
+
       // Assert
       expect(result).toBe(expected);
     });
-    
+
     it('should handle error case', () => {
       expect(() => dangerousAction()).toThrow();
     });
@@ -332,11 +431,13 @@ describe('FeatureName', () => {
 ```
 
 ### Test Coverage Requirements
+
 - **Minimum**: 80% overall coverage
 - **Target**: 90% for new code
 - **Critical paths**: 100% coverage
 
 ### What to Test
+
 - ✅ All public APIs
 - ✅ Error conditions
 - ✅ Edge cases
@@ -346,6 +447,7 @@ describe('FeatureName', () => {
 - ❌ Third-party library behavior
 
 ### Running Tests
+
 ```bash
 # Run all tests
 npm test
@@ -367,21 +469,25 @@ npm run test:coverage
 ### Types of Documentation
 
 #### 1. Code Comments
+
 - Explain why, not what
 - Use JSDoc for public APIs
 - Keep comments up to date
 
 #### 2. README.md
+
 - Quick start guide
 - Basic examples
 - Installation instructions
 
 #### 3. API Documentation
+
 - Generated from JSDoc
 - Complete parameter descriptions
 - Usage examples
 
 #### 4. Guides and Tutorials
+
 - Step-by-step instructions
 - Real-world examples
 - Best practices
@@ -389,9 +495,10 @@ npm run test:coverage
 ### Writing Good Documentation
 
 #### Be Clear and Concise
+
 ```markdown
 // ❌ Bad
-The `use` function is a method that can be utilized to incorporate middleware 
+The `use` function is a method that can be utilized to incorporate middleware
 into the processing pipeline for the purpose of modifying requests.
 
 // ✅ Good
@@ -399,7 +506,8 @@ Register a middleware function to modify requests before they're sent.
 ```
 
 #### Include Examples
-```markdown
+
+````markdown
 ## Authentication
 
 Add a bearer token to all requests:
@@ -412,6 +520,8 @@ fej.use(async (req, next) => {
   return req;
 });
 ```
+````
+
 ```
 
 #### Keep It Updated
@@ -426,15 +536,18 @@ fej.use(async (req, next) => {
 Before submitting your PR, ensure:
 
 - [ ] Code follows project style guidelines
-- [ ] Tests added/updated and passing
-- [ ] Documentation updated
+- [ ] Tests added/updated and passing (minimum 80% coverage)
+- [ ] All tests pass: `npm test`
+- [ ] Type checking passes: `npm run type-check`
+- [ ] Linting passes: `npm run lint`
+- [ ] Code is formatted: `npm run format`
+- [ ] Documentation updated (JSDoc, README, migration guides)
 - [ ] Commit messages follow convention
-- [ ] Branch is up to date with main
+- [ ] Branch is up to date with master
 - [ ] No merge conflicts
 - [ ] PR description is complete
 - [ ] Related issue is referenced
-- [ ] Screenshots included (if UI changes)
-- [ ] Breaking changes are documented
+- [ ] Breaking changes are documented in CHANGELOG.md
 
 ---
 
@@ -500,3 +613,4 @@ If you have questions not covered here:
 4. Open an issue
 
 Thank you for contributing to fej! 🎉
+```

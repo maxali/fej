@@ -1,0 +1,17 @@
+{
+  "name": "fej-basic-usage-examples",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Basic usage examples for fej",
+  "scripts": {
+    "simple-get": "node simple-get.js",
+    "post-json": "node post-json.js",
+    "custom-headers": "node custom-headers.js",
+    "multiple-instances": "node multiple-instances.js",
+    "request-cancellation": "node request-cancellation.js"
+  },
+  "dependencies": {
+    "fej": "file:../.."
+  }
+}
