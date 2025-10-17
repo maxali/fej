@@ -74,7 +74,6 @@ All deprecated APIs remain functional with console warnings and will be removed 
 
 ### Developer Experience
 
-- Complete [Migration Guide](./MIGRATION_GUIDE_V2.md)
 - 15+ documentation guides
 - 16+ complete examples
 - TypeScript strict mode support
@@ -83,7 +82,6 @@ All deprecated APIs remain functional with console warnings and will be removed 
 ### Links
 
 - [API Documentation](https://maxali.github.io/fej/)
-- [Migration Guide](./MIGRATION_GUIDE_V2.md)
 - [npm Package](https://www.npmjs.com/package/fej)
 
 ---
@@ -166,8 +164,6 @@ All deprecated APIs remain functional with console warnings and will be removed 
 ## Migration Guide
 
 ### Migrating from v1.0.x to v1.1.0
-
-See [MIGRATION_GUIDE_V2.md](./MIGRATION_GUIDE_V2.md) for detailed migration instructions.
 
 **Quick Summary:**
 
