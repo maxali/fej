@@ -1,7 +1,7 @@
 {
   "name": "fej",
-  "version": "2.0.0-rc.0",
-  "description": "Fetch API with middlewares - v2.0 release candidate! See MIGRATION_GUIDE_V2.md",
+  "version": "2.0.0",
+  "description": "Fetch API with middlewares - Modern, lightweight, zero dependencies. Named middleware, retry logic, AbortController support, and more!",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
