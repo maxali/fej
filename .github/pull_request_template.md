@@ -113,7 +113,6 @@ Closes #<!-- issue number -->
 
 - [ ] JSDoc comments added/updated for public APIs
 - [ ] README.md updated (if needed)
-- [ ] MIGRATION_GUIDE_V2.md updated (if breaking changes)
 - [ ] CHANGELOG.md updated
 - [ ] Code examples provided for new features
 - [ ] TypeDoc generates without warnings

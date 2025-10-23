@@ -74,7 +74,6 @@ All deprecated APIs remain functional with console warnings and will be removed 
 
 ### Developer Experience
 
-- Complete [Migration Guide](./MIGRATION_GUIDE_V2.md)
 - 15+ documentation guides
 - 16+ complete examples
 - TypeScript strict mode support
@@ -83,7 +82,6 @@ All deprecated APIs remain functional with console warnings and will be removed 
 ### Links
 
 - [API Documentation](https://maxali.github.io/fej/)
-- [Migration Guide](./MIGRATION_GUIDE_V2.md)
 - [npm Package](https://www.npmjs.com/package/fej)
 
 ---
@@ -160,59 +158,6 @@ All deprecated APIs remain functional with console warnings and will be removed 
 - Middleware pattern for fetch API
 - Basic TypeScript support
 - Documentation and examples
-
----
-
-## Migration Guide
-
-### Migrating from v1.0.x to v1.1.0
-
-See [MIGRATION_GUIDE_V2.md](./MIGRATION_GUIDE_V2.md) for detailed migration instructions.
-
-**Quick Summary:**
-
-**Before (v1.0.x):**
-```typescript
-import Fej from 'fej';
-
-Fej.setInit({ headers: { 'X-API-Key': 'key' } });
-Fej.addMiddleware((init) => ({ ...init, mode: 'cors' }));
-Fej.addAsyncMiddleware(async (init) => { /* ... */ });
-
-const response = await Fej.fej('https://api.example.com/data');
-```
-
-**After (v1.1.0):**
-```typescript
-import { createFej } from 'fej';
-
-const api = createFej({
-  headers: { 'X-API-Key': 'key' }
-});
-
-api.use('cors', async (ctx, next) => {
-  ctx.request.init.mode = 'cors';
-  await next();
-});
-
-api.use('auth', async (ctx, next) => {
-  // Async operations supported automatically
-  await next();
-});
-
-const response = await api.fej('https://api.example.com/data');
-```
-
-**Key Changes:**
-1. Use `createFej()` instead of singleton `Fej`
-2. Pass configuration to `createFej()` instead of `setInit()`
-3. Use unified `use()` method instead of `addMiddleware()` and `addAsyncMiddleware()`
-4. Middleware uses `(ctx, next)` pattern instead of returning RequestInit
-
-**Backward Compatibility:**
-- Old APIs still work with deprecation warnings
-- Gradual migration supported
-- No breaking changes in 1.1.0
 
 ---
 
