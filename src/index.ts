@@ -14,12 +14,14 @@ export type {
   ErrorTransform,
   CancellationMiddlewareConfig,
   FejConfig,
+  FejResponse,
+  FejRequestOptions,
 } from './types.js';
 
 // ============================================================
 // Re-export error classes
 // ============================================================
-export { FejError, FejTimeoutError, FejRetryError } from './errors.js';
+export { FejError, FejTimeoutError, FejRetryError, FejHttpError } from './errors.js';
 
 // ============================================================
 // Re-export middleware utilities

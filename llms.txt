@@ -1,0 +1,138 @@
+# fej
+
+> Fetch API with middleware — TypeScript-first, zero dependencies.
+
+## Install
+
+```
+npm install fej
+```
+
+## Quick Start
+
+### Layer 1: Drop-in fetch() replacement
+```typescript
+import { createFej } from 'fej';
+const api = createFej({ baseURL: 'https://api.example.com' });
+
+const response = await api.fetch('/users');        // Returns standard Response
+const data = await response.json();
+```
+
+### Layer 2: Typed convenience methods
+```typescript
+interface User { id: number; name: string }
+
+const { data } = await api.get<User[]>('/users', { params: { page: 1 } });
+const { data: created } = await api.post<User>('/users', { name: 'Alice' });
+```
+
+### Layer 3: Middleware
+```typescript
+api.use('auth', async (ctx, next) => {
+  ctx.request.init.headers = new Headers(ctx.request.init.headers);
+  ctx.request.init.headers.set('Authorization', `Bearer ${token}`);
+  await next();
+});
+```
+
+## API Reference
+
+### createFej(config?)
+
+Creates a new Fej instance.
+
+Config options:
+- `baseURL?: string` — prepended to all request URLs
+- `headers?: HeadersInit` — default headers for all requests
+- `timeout?: number` — default timeout in milliseconds
+- `throwHttpErrors?: boolean` — throw FejHttpError on 4xx/5xx (default: true, convenience methods only)
+- `responseType?: 'json' | 'text' | 'blob' | 'arrayBuffer'` — default response parsing (default: 'json')
+- `retry?: { attempts, delay, backoff }` — retry configuration
+
+### Methods
+
+| Method | Signature | Returns |
+|--------|-----------|---------|
+| `api.fetch(url, init?)` | Same as `globalThis.fetch` | `Promise<Response>` |
+| `api.get<T>(url, opts?)` | Typed GET | `Promise<FejResponse<T>>` |
+| `api.post<T>(url, body?, opts?)` | Typed POST | `Promise<FejResponse<T>>` |
+| `api.put<T>(url, body?, opts?)` | Typed PUT | `Promise<FejResponse<T>>` |
+| `api.patch<T>(url, body?, opts?)` | Typed PATCH | `Promise<FejResponse<T>>` |
+| `api.delete<T>(url, opts?)` | Typed DELETE | `Promise<FejResponse<T>>` |
+| `api.fej(url, init?)` | Low-level with middleware | `Promise<Response>` |
+| `api.use(name, fn, priority?)` | Add middleware | `string` |
+
+### FejResponse<T>
+
+```typescript
+{
+  data: T;           // Parsed body
+  status: number;    // HTTP status
+  statusText: string;
+  headers: Headers;
+  ok: boolean;       // true for 2xx
+  raw: Response;     // Original Response
+}
+```
+
+### FejRequestOptions
+
+```typescript
+{
+  headers?: HeadersInit;
+  signal?: AbortSignal;
+  params?: Record<string, string | number | boolean>;  // Query params
+  timeout?: number;
+  responseType?: 'json' | 'text' | 'blob' | 'arrayBuffer';
+  cache?: RequestCache;
+  credentials?: RequestCredentials;
+}
+```
+
+### Errors
+
+- `FejError` — base error class
+- `FejHttpError` — HTTP 4xx/5xx errors (has `.status`, `.statusText`, `.data`, `.headers`)
+- `FejTimeoutError` — timeout errors
+- `FejRetryError` — retry exhaustion errors
+
+### Error Handling
+
+```typescript
+import { FejHttpError } from 'fej';
+
+try {
+  await api.get('/users/999');
+} catch (error) {
+  if (error instanceof FejHttpError) {
+    console.log(error.status);  // 404
+    console.log(error.data);    // parsed response body
+  }
+}
+```
+
+### Common Patterns
+
+#### File Upload
+```typescript
+const form = new FormData();
+form.append('file', file);
+await api.post('/upload', form);  // FormData sent as-is, no JSON stringify
+```
+
+#### Middleware: Logging
+```typescript
+api.use('logger', async (ctx, next) => {
+  const start = Date.now();
+  await next();
+  console.log(`${ctx.request.url} — ${Date.now() - start}ms`);
+});
+```
+
+#### Disable error throwing
+```typescript
+const api = createFej({ throwHttpErrors: false });
+const { data, status } = await api.get('/maybe-404');
+if (status === 404) { /* handle */ }
+```

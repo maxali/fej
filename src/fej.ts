@@ -8,12 +8,15 @@ import type {
   ErrorTransform,
   CancellationOptions,
   FejConfig,
+  FejResponse,
+  FejRequestOptions,
 } from './types.js';
 import {
   createBaseURLMiddleware,
   createDefaultHeadersMiddleware,
   createTimeoutMiddleware,
 } from './middleware.js';
+import { FejHttpError } from './errors.js';
 
 /**
  * Fej - Fetch with middleware support
@@ -45,6 +48,7 @@ export class Fej {
   private static globalInit: RequestInit = {};
   private middleWares: IFejMiddleware[] = [];
   private asyncMiddleWares: IFejAsyncMiddleware[] = [];
+  private instanceConfig: FejConfig;
 
   // V2 Middleware management
   private middlewareEntries: Map<string, MiddlewareEntry> = new Map();
@@ -61,6 +65,15 @@ export class Fej {
   private abortControllers: Map<string, AbortController> = new Map();
   private requestTags: Map<string, Set<string>> = new Map(); // Map tags to request IDs
   private requestIdCounter = 0;
+
+  /**
+   * Create a new Fej instance
+   *
+   * @param config - Optional configuration for the instance
+   */
+  constructor(config?: FejConfig) {
+    this.instanceConfig = config ?? {};
+  }
 
   /**
    * Execute a fetch request with middleware applied
@@ -852,6 +865,241 @@ export class Fej {
     return ctx.response;
   }
 
+  // ============================================================
+  // Fetch-compatible & Convenience API
+  // ============================================================
+
+  /**
+   * Drop-in replacement for globalThis.fetch()
+   *
+   * Same signature and return type as native fetch(). The only difference is
+   * that registered middleware runs in the pipeline. Does NOT throw on 4xx/5xx
+   * (just like native fetch).
+   *
+   * @param input - URL string, URL object, or Request object
+   * @param init - Standard RequestInit options
+   * @returns Standard Response (same as fetch())
+   *
+   * @example
+   * ```typescript
+   * const api = createFej();
+   * const response = await api.fetch('https://api.example.com/users');
+   * const data = await response.json();
+   * ```
+   *
+   * @public
+   */
+  public async fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+    return this.fej(input as RequestInfo, init);
+  }
+
+  /**
+   * GET request with typed response
+   *
+   * @param url - Request URL
+   * @param options - Request options (params, headers, timeout, etc.)
+   * @returns Typed FejResponse with parsed data
+   *
+   * @example
+   * ```typescript
+   * const { data } = await api.get<User[]>('/api/users', {
+   *   params: { page: 1 },
+   * });
+   * ```
+   *
+   * @public
+   */
+  public async get<T = unknown>(url: string, options?: FejRequestOptions): Promise<FejResponse<T>> {
+    const init = this.buildRequestInit('GET', undefined, options);
+    const finalUrl = this.appendParams(url, options?.params);
+    const response = await this.fej(finalUrl, init);
+    return this.parseResponse<T>(response, options);
+  }
+
+  /**
+   * POST request with typed response
+   *
+   * @param url - Request URL
+   * @param body - Request body (objects/arrays are auto-JSON-stringified)
+   * @param options - Request options
+   * @returns Typed FejResponse with parsed data
+   *
+   * @example
+   * ```typescript
+   * const { data } = await api.post<User>('/api/users', { name: 'John' });
+   * ```
+   *
+   * @public
+   */
+  public async post<T = unknown>(url: string, body?: unknown, options?: FejRequestOptions): Promise<FejResponse<T>> {
+    const init = this.buildRequestInit('POST', body, options);
+    const finalUrl = this.appendParams(url, options?.params);
+    const response = await this.fej(finalUrl, init);
+    return this.parseResponse<T>(response, options);
+  }
+
+  /**
+   * PUT request with typed response
+   *
+   * @param url - Request URL
+   * @param body - Request body (objects/arrays are auto-JSON-stringified)
+   * @param options - Request options
+   * @returns Typed FejResponse with parsed data
+   *
+   * @public
+   */
+  public async put<T = unknown>(url: string, body?: unknown, options?: FejRequestOptions): Promise<FejResponse<T>> {
+    const init = this.buildRequestInit('PUT', body, options);
+    const finalUrl = this.appendParams(url, options?.params);
+    const response = await this.fej(finalUrl, init);
+    return this.parseResponse<T>(response, options);
+  }
+
+  /**
+   * PATCH request with typed response
+   *
+   * @param url - Request URL
+   * @param body - Request body (objects/arrays are auto-JSON-stringified)
+   * @param options - Request options
+   * @returns Typed FejResponse with parsed data
+   *
+   * @public
+   */
+  public async patch<T = unknown>(url: string, body?: unknown, options?: FejRequestOptions): Promise<FejResponse<T>> {
+    const init = this.buildRequestInit('PATCH', body, options);
+    const finalUrl = this.appendParams(url, options?.params);
+    const response = await this.fej(finalUrl, init);
+    return this.parseResponse<T>(response, options);
+  }
+
+  /**
+   * DELETE request with typed response
+   *
+   * @param url - Request URL
+   * @param options - Request options
+   * @returns Typed FejResponse with parsed data
+   *
+   * @public
+   */
+  public async delete<T = unknown>(url: string, options?: FejRequestOptions): Promise<FejResponse<T>> {
+    const init = this.buildRequestInit('DELETE', undefined, options);
+    const finalUrl = this.appendParams(url, options?.params);
+    const response = await this.fej(finalUrl, init);
+    return this.parseResponse<T>(response, options);
+  }
+
+  /**
+   * Build RequestInit from method, body, and options
+   * Auto-stringifies object/array bodies and sets Content-Type
+   * @private
+   */
+  private buildRequestInit(method: string, body?: unknown, options?: FejRequestOptions): RequestInit {
+    const init: RequestInit = { method };
+
+    // Pass through standard fetch options
+    if (options?.headers) init.headers = options.headers;
+    if (options?.signal) init.signal = options.signal;
+    if (options?.cache) init.cache = options.cache;
+    if (options?.credentials) init.credentials = options.credentials;
+    if (options?.mode) init.mode = options.mode;
+    if (options?.redirect) init.redirect = options.redirect;
+
+    // Handle body
+    if (body !== undefined && body !== null) {
+      if (
+        typeof body === 'object' &&
+        !(body instanceof FormData) &&
+        !(body instanceof Blob) &&
+        !(body instanceof ArrayBuffer) &&
+        !(body instanceof URLSearchParams) &&
+        !(body instanceof ReadableStream)
+      ) {
+        // Auto JSON.stringify for plain objects and arrays
+        init.body = JSON.stringify(body);
+        // Set Content-Type if not already set
+        const headers = new Headers(init.headers);
+        if (!headers.has('Content-Type')) {
+          headers.set('Content-Type', 'application/json');
+        }
+        init.headers = headers;
+      } else {
+        init.body = body as BodyInit;
+      }
+    }
+
+    return init;
+  }
+
+  /**
+   * Append query params to a URL string
+   * Handles existing query strings and special characters
+   * @private
+   */
+  private appendParams(url: string, params?: Record<string, string | number | boolean>): string {
+    if (!params || Object.keys(params).length === 0) return url;
+
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      searchParams.append(key, String(value));
+    }
+
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}${searchParams.toString()}`;
+  }
+
+  /**
+   * Parse a Response into a typed FejResponse
+   * Throws FejHttpError on 4xx/5xx when throwHttpErrors is enabled
+   * @private
+   */
+  private async parseResponse<T>(response: Response, options?: FejRequestOptions): Promise<FejResponse<T>> {
+    const responseType = options?.responseType ?? this.instanceConfig.responseType ?? 'json';
+    const shouldThrow = this.instanceConfig.throwHttpErrors !== false;
+
+    let data: unknown;
+    // Clone so the raw response body is still consumable
+    const clone = response.clone();
+
+    if (responseType === 'text') {
+      data = await clone.text();
+    } else if (responseType === 'blob') {
+      data = await clone.blob();
+    } else if (responseType === 'arrayBuffer') {
+      data = await clone.arrayBuffer();
+    } else {
+      // json (default) — fall back to text if JSON parse fails
+      const text = await clone.text();
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = text;
+      }
+    }
+
+    if (shouldThrow && !response.ok) {
+      throw new FejHttpError(
+        `HTTP ${response.status}: ${response.statusText}`,
+        response.status,
+        response.statusText,
+        data,
+        response.headers
+      );
+    }
+
+    return {
+      data: data as T,
+      status: response.status,
+      statusText: response.statusText,
+      headers: response.headers,
+      ok: response.ok,
+      raw: response,
+    };
+  }
+
+  // ============================================================
+  // Private utility methods
+  // ============================================================
+
   private isObject = (item: unknown): item is Record<string, unknown> => {
     return item !== null && typeof item === 'object' && !Array.isArray(item);
   };
@@ -1093,7 +1341,7 @@ export class Fej {
  * @public
  */
 export const createFej = (config?: FejConfig): Fej => {
-  const instance = new Fej();
+  const instance = new Fej(config);
 
   // Apply baseURL middleware (highest priority: 100)
   // This runs first to ensure all URLs are properly resolved

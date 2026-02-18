@@ -253,6 +253,76 @@ export interface FejConfig {
   retry?: Partial<RetryConfig>;
   /** Error transformation functions */
   errorTransforms?: ErrorTransform[];
+  /** Throw FejHttpError on 4xx/5xx in convenience methods (default: true) */
+  throwHttpErrors?: boolean;
+  /** Default response type for convenience methods (default: 'json') */
+  responseType?: 'json' | 'text' | 'blob' | 'arrayBuffer';
   /** Additional custom configuration */
   [key: string]: unknown;
+}
+
+/**
+ * Typed response wrapper returned by convenience methods (.get, .post, etc.)
+ *
+ * Provides parsed response data with full type safety, similar to axios responses.
+ *
+ * @example
+ * ```typescript
+ * interface User { id: number; name: string }
+ * const { data, status } = await api.get<User>('/api/user/1');
+ * console.log(data.name); // fully typed
+ * ```
+ *
+ * @public
+ */
+export interface FejResponse<T> {
+  /** Parsed response body (JSON, text, blob, etc.) */
+  data: T;
+  /** HTTP status code */
+  status: number;
+  /** HTTP status text */
+  statusText: string;
+  /** Response headers */
+  headers: Headers;
+  /** true for 2xx status codes */
+  ok: boolean;
+  /** Original Response object (escape hatch) */
+  raw: Response;
+}
+
+/**
+ * Request options for convenience methods (.get, .post, etc.)
+ *
+ * Superset of commonly-used RequestInit properties plus fej enhancements.
+ *
+ * @example
+ * ```typescript
+ * const { data } = await api.get<User[]>('/api/users', {
+ *   params: { page: 1, limit: 10 },
+ *   timeout: 5000,
+ *   headers: { 'Accept': 'application/json' },
+ * });
+ * ```
+ *
+ * @public
+ */
+export interface FejRequestOptions {
+  /** Request headers */
+  headers?: HeadersInit;
+  /** AbortSignal for request cancellation */
+  signal?: AbortSignal;
+  /** Cache mode */
+  cache?: RequestCache;
+  /** Credentials mode */
+  credentials?: RequestCredentials;
+  /** Request mode (cors, no-cors, same-origin) */
+  mode?: RequestMode;
+  /** Redirect mode */
+  redirect?: RequestRedirect;
+  /** Query parameters — appended to the URL */
+  params?: Record<string, string | number | boolean>;
+  /** Per-request timeout in milliseconds */
+  timeout?: number;
+  /** How to parse the response body (default: 'json') */
+  responseType?: 'json' | 'text' | 'blob' | 'arrayBuffer';
 }
