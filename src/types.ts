@@ -291,6 +291,26 @@ export interface FejResponse<T> {
 }
 
 /**
+ * Base options shared by both HTTP requests and SSE streams
+ *
+ * Contains transport-level options common to all request types.
+ *
+ * @public
+ */
+export interface FejBaseOptions {
+  /** Request headers */
+  headers?: HeadersInit;
+  /** AbortSignal for request cancellation */
+  signal?: AbortSignal;
+  /** Credentials mode */
+  credentials?: RequestCredentials;
+  /** Request mode (cors, no-cors, same-origin) */
+  mode?: RequestMode;
+  /** Query parameters — appended to the URL */
+  params?: Record<string, string | number | boolean>;
+}
+
+/**
  * Request options for convenience methods (.get, .post, etc.)
  *
  * Superset of commonly-used RequestInit properties plus fej enhancements.
@@ -306,23 +326,55 @@ export interface FejResponse<T> {
  *
  * @public
  */
-export interface FejRequestOptions {
-  /** Request headers */
-  headers?: HeadersInit;
-  /** AbortSignal for request cancellation */
-  signal?: AbortSignal;
+export interface FejRequestOptions extends FejBaseOptions {
   /** Cache mode */
   cache?: RequestCache;
-  /** Credentials mode */
-  credentials?: RequestCredentials;
-  /** Request mode (cors, no-cors, same-origin) */
-  mode?: RequestMode;
   /** Redirect mode */
   redirect?: RequestRedirect;
-  /** Query parameters — appended to the URL */
-  params?: Record<string, string | number | boolean>;
   /** Per-request timeout in milliseconds */
   timeout?: number;
   /** How to parse the response body (default: 'json') */
   responseType?: 'json' | 'text' | 'blob' | 'arrayBuffer';
+}
+
+/**
+ * A single parsed SSE event
+ *
+ * @public
+ */
+export interface SSEEvent<T = string> {
+  /** Event type — "message" (default per spec) or server-specified via event: field */
+  event: string;
+  /** Parsed data — raw string when T=string, JSON-parsed when T is non-string */
+  data: T;
+  /** Event ID from the id: field (used for reconnection) */
+  id?: string;
+}
+
+/**
+ * Options for the .sse() method
+ *
+ * @public
+ */
+export interface SSEOptions extends FejBaseOptions {
+  /** HTTP method (default: 'GET') */
+  method?: string;
+  /** Request body — objects/arrays auto-JSON-stringified, same as .post() */
+  body?: unknown;
+  /** Auto-reconnect on disconnect (default: true, like native EventSource) */
+  reconnect?: boolean;
+  /** Max reconnection attempts (default: 5, -1 for infinite) */
+  maxRetries?: number;
+  /** Initial retry delay in ms (default: 1000) — exponential backoff with jitter */
+  retryDelay?: number;
+  /** Max retry delay cap in ms (default: 30000) */
+  maxRetryDelay?: number;
+  /** Add ±20% jitter to reconnection delay to prevent storms (default: true) */
+  jitter?: boolean;
+  /** Raw data strings that signal stream end — matched events are consumed, not yielded
+   *  (default: ['[DONE]'] for OpenAI/Mistral compat; set [] to disable) */
+  terminators?: string[];
+  /** Called when connection opens/reopens — receives the raw Response.
+   *  Useful for inspecting rate-limit headers. */
+  onOpen?: (response: Response) => void;
 }

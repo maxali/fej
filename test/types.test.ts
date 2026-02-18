@@ -1,6 +1,6 @@
 import { expectTypeOf } from 'expect-type';
 import { describe, it } from 'vitest';
-import type { IFejMiddleware, IFejAsyncMiddleware } from '../src/index';
+import type { IFejMiddleware, IFejAsyncMiddleware, FejBaseOptions, FejRequestOptions, SSEOptions } from '../src/index';
 import { fej, addMiddleware, addAsyncMiddleware } from '../src/index';
 
 describe('Type Tests', () => {
@@ -243,6 +243,43 @@ describe('Type Tests', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
+    });
+  });
+
+  describe('Type Hierarchy — FejBaseOptions', () => {
+    it('FejRequestOptions should be assignable to FejBaseOptions', () => {
+      expectTypeOf<FejRequestOptions>().toMatchTypeOf<FejBaseOptions>();
+    });
+
+    it('SSEOptions should be assignable to FejBaseOptions', () => {
+      expectTypeOf<SSEOptions>().toMatchTypeOf<FejBaseOptions>();
+    });
+
+    it('FejRequestOptions should have HTTP-specific fields', () => {
+      expectTypeOf<FejRequestOptions>().toHaveProperty('cache');
+      expectTypeOf<FejRequestOptions>().toHaveProperty('redirect');
+      expectTypeOf<FejRequestOptions>().toHaveProperty('timeout');
+      expectTypeOf<FejRequestOptions>().toHaveProperty('responseType');
+    });
+
+    it('SSEOptions should NOT have HTTP-specific fields', () => {
+      type HasCache = 'cache' extends keyof SSEOptions ? true : false;
+      type HasRedirect = 'redirect' extends keyof SSEOptions ? true : false;
+      type HasTimeout = 'timeout' extends keyof SSEOptions ? true : false;
+      type HasResponseType = 'responseType' extends keyof SSEOptions ? true : false;
+
+      expectTypeOf<HasCache>().toEqualTypeOf<false>();
+      expectTypeOf<HasRedirect>().toEqualTypeOf<false>();
+      expectTypeOf<HasTimeout>().toEqualTypeOf<false>();
+      expectTypeOf<HasResponseType>().toEqualTypeOf<false>();
+    });
+
+    it('SSEOptions should have SSE-specific fields', () => {
+      expectTypeOf<SSEOptions>().toHaveProperty('method');
+      expectTypeOf<SSEOptions>().toHaveProperty('body');
+      expectTypeOf<SSEOptions>().toHaveProperty('reconnect');
+      expectTypeOf<SSEOptions>().toHaveProperty('terminators');
+      expectTypeOf<SSEOptions>().toHaveProperty('onOpen');
     });
   });
 

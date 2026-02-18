@@ -9,14 +9,18 @@ import type {
   CancellationOptions,
   FejConfig,
   FejResponse,
+  FejBaseOptions,
   FejRequestOptions,
+  SSEEvent,
+  SSEOptions,
 } from './types.js';
 import {
   createBaseURLMiddleware,
   createDefaultHeadersMiddleware,
   createTimeoutMiddleware,
 } from './middleware.js';
-import { FejHttpError } from './errors.js';
+import { FejHttpError, FejSSEError } from './errors.js';
+import { SSEParser } from './sse-parser.js';
 
 /**
  * Fej - Fetch with middleware support
@@ -988,12 +992,448 @@ export class Fej {
     return this.parseResponse<T>(response, options);
   }
 
+  // ============================================================
+  // SSE Streaming API
+  // ============================================================
+
+  /**
+   * Stream Server-Sent Events from a URL
+   *
+   * Returns an async generator that yields parsed SSE events. Supports
+   * both GET and POST (for LLM APIs), automatic reconnection with
+   * exponential backoff, JSON parsing via generics, and terminator
+   * detection for `[DONE]` sentinels.
+   *
+   * @param url - Request URL
+   * @param options - SSE options (method, body, reconnect, terminators, etc.)
+   * @returns AsyncGenerator yielding SSEEvent objects
+   *
+   * @example Simple GET streaming
+   * ```typescript
+   * for await (const event of api.sse('/stream')) {
+   *   console.log(event.data);
+   * }
+   * ```
+   *
+   * @example OpenAI-style POST with JSON parsing
+   * ```typescript
+   * for await (const event of api.sse<ChatChunk>('/chat/completions', {
+   *   method: 'POST',
+   *   body: { model: 'gpt-4', stream: true, messages },
+   * })) {
+   *   process.stdout.write(event.data.choices[0].delta.content);
+   * }
+   * ```
+   *
+   * @public
+   */
+  public async *sse<T = string>(
+    url: string,
+    options?: SSEOptions
+  ): AsyncGenerator<SSEEvent<T>, void, undefined> {
+    // Double consumption guard
+    let started = false;
+    if (started) {
+      throw new FejSSEError('Cannot iterate over a consumed SSE stream');
+    }
+    started = true;
+
+    const method = options?.method ?? 'GET';
+    const reconnect = options?.reconnect !== false;
+    const maxRetries = options?.maxRetries ?? 5;
+    const initialRetryDelay = options?.retryDelay ?? 1000;
+    const maxRetryDelay = options?.maxRetryDelay ?? 30000;
+    const jitter = options?.jitter !== false;
+    const terminators = options?.terminators ?? ['[DONE]'];
+    const onOpen = options?.onOpen;
+
+    // Create abort controller for this SSE stream
+    const { controller: sseController, requestId: sseRequestId } =
+      this.createAbortController(undefined, ['sse']);
+
+    // Compose abort signals: internal SSE controller + user-provided signal
+    let composedSignal: AbortSignal = sseController.signal;
+    if (options?.signal) {
+      composedSignal = this.composeAbortSignals(sseController.signal, options.signal);
+    }
+
+    const parser = new SSEParser();
+    let retryCount = 0;
+    let currentRetryDelay = initialRetryDelay;
+
+    try {
+      reconnectLoop: while (true) {
+        // Build request init — reuse existing infrastructure
+        const init = this.buildRequestInit(method, options?.body, options);
+
+        // Set SSE-specific headers
+        const headers = new Headers(init.headers);
+        headers.set('Accept', 'text/event-stream');
+        headers.set('Cache-Control', 'no-store');
+
+        // Add Last-Event-ID header on reconnect
+        const lastEventId = parser.getLastEventId();
+        if (lastEventId) {
+          headers.set('Last-Event-ID', lastEventId);
+        }
+
+        init.headers = headers;
+        init.signal = composedSignal;
+
+        // Append query params
+        const finalUrl = this.appendParams(url, options?.params);
+
+        let response: Response;
+        try {
+          // Fetch through full middleware pipeline
+          response = await this.fej(finalUrl, init);
+        } catch (error) {
+          // If aborted, don't reconnect
+          if (composedSignal.aborted) {
+            return;
+          }
+          // Network errors are retryable
+          if (reconnect && this.shouldRetrySSE(retryCount, maxRetries)) {
+            retryCount++;
+            const delay = this.calculateSSERetryDelay(
+              currentRetryDelay,
+              maxRetryDelay,
+              jitter
+            );
+            currentRetryDelay = Math.min(currentRetryDelay * 2, maxRetryDelay);
+            await this.abortableSleep(delay, composedSignal);
+            if (composedSignal.aborted) return;
+            parser.reset();
+            continue reconnectLoop;
+          }
+          throw error;
+        }
+
+        // HTTP 204 — clean close, never reconnect (server says "stop")
+        if (response.status === 204) {
+          return;
+        }
+
+        // Non-2xx status — classify for retry
+        if (!response.ok) {
+          const status = response.status;
+          // Non-retryable errors
+          if (status === 401 || status === 403 || status === 404) {
+            // Read body for error context
+            const data = await this.safeReadBody(response);
+            throw new FejHttpError(
+              `HTTP ${status}: ${response.statusText}`,
+              status,
+              response.statusText,
+              data,
+              response.headers
+            );
+          }
+
+          // Retryable errors (429, 5xx)
+          if (reconnect && this.shouldRetrySSE(retryCount, maxRetries)) {
+            retryCount++;
+            let delay: number;
+
+            if (status === 429) {
+              // Respect Retry-After header
+              delay = this.parseRetryAfter(response.headers) ?? this.calculateSSERetryDelay(
+                currentRetryDelay,
+                maxRetryDelay,
+                jitter
+              );
+            } else {
+              delay = this.calculateSSERetryDelay(
+                currentRetryDelay,
+                maxRetryDelay,
+                jitter
+              );
+            }
+
+            currentRetryDelay = Math.min(currentRetryDelay * 2, maxRetryDelay);
+            await this.abortableSleep(delay, composedSignal);
+            if (composedSignal.aborted) return;
+            parser.reset();
+            continue reconnectLoop;
+          }
+
+          const data = await this.safeReadBody(response);
+          throw new FejHttpError(
+            `HTTP ${status}: ${response.statusText}`,
+            status,
+            response.statusText,
+            data,
+            response.headers
+          );
+        }
+
+        // Content-Type validation
+        const contentType = response.headers.get('Content-Type') ?? '';
+        if (!contentType.includes('text/event-stream')) {
+          throw new FejSSEError(
+            `Expected Content-Type "text/event-stream", got "${contentType}"`,
+            response
+          );
+        }
+
+        // Call onOpen callback
+        if (onOpen) {
+          onOpen(response);
+        }
+
+        // Read the stream
+        if (!response.body) {
+          throw new FejSSEError('Response body is null', response);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let receivedFirstEvent = false;
+
+        try {
+          while (true) {
+            let result: ReadableStreamReadResult<Uint8Array>;
+            try {
+              result = await reader.read();
+            } catch {
+              // Stream read error
+              if (composedSignal.aborted) return;
+              break; // Break to reconnect
+            }
+
+            if (result.done) {
+              // Flush decoder
+              const finalChunk = decoder.decode(undefined, { stream: false });
+              if (finalChunk) {
+                const events = parser.feed(finalChunk);
+                for (const rawEvent of events) {
+                  // Update retry delay from server
+                  const serverRetry = parser.getRetryMs();
+                  if (serverRetry !== undefined) {
+                    currentRetryDelay = serverRetry;
+                  }
+
+                  // Check terminators
+                  if (terminators.includes(rawEvent.data)) {
+                    return;
+                  }
+
+                  const sseEvent = this.coerceSSEEvent<T>(rawEvent);
+                  if (sseEvent) {
+                    if (!receivedFirstEvent) {
+                      receivedFirstEvent = true;
+                      retryCount = 0;
+                      currentRetryDelay = parser.getRetryMs() ?? initialRetryDelay;
+                    }
+                    yield sseEvent;
+                  }
+                }
+              }
+              break; // Stream ended, break to reconnect
+            }
+
+            const chunk = decoder.decode(result.value, { stream: true });
+            const events = parser.feed(chunk);
+
+            for (const rawEvent of events) {
+              // Update retry delay from server
+              const serverRetry = parser.getRetryMs();
+              if (serverRetry !== undefined) {
+                currentRetryDelay = serverRetry;
+              }
+
+              // Check terminators
+              if (terminators.includes(rawEvent.data)) {
+                // Consume the terminator — cancel reader and return
+                await reader.cancel();
+                return;
+              }
+
+              const sseEvent = this.coerceSSEEvent<T>(rawEvent);
+              if (sseEvent) {
+                if (!receivedFirstEvent) {
+                  receivedFirstEvent = true;
+                  retryCount = 0;
+                  currentRetryDelay = parser.getRetryMs() ?? initialRetryDelay;
+                }
+                yield sseEvent;
+              }
+            }
+          }
+        } finally {
+          // Always clean up the reader
+          try {
+            await reader.cancel();
+          } catch {
+            // Ignore cancel errors
+          }
+        }
+
+        // Stream ended — reconnect if enabled
+        if (composedSignal.aborted) return;
+        if (!reconnect) return;
+        if (!this.shouldRetrySSE(retryCount, maxRetries)) return;
+
+        retryCount++;
+        const delay = this.calculateSSERetryDelay(
+          currentRetryDelay,
+          maxRetryDelay,
+          jitter
+        );
+        currentRetryDelay = Math.min(currentRetryDelay * 2, maxRetryDelay);
+        await this.abortableSleep(delay, composedSignal);
+        if (composedSignal.aborted) return;
+        parser.reset();
+      }
+    } finally {
+      // Unregister from abort controller infrastructure
+      this.untrackRequest(sseRequestId);
+      this.abortControllers.delete(sseRequestId);
+    }
+  }
+
+  /**
+   * Coerce a raw SSE event into a typed SSEEvent.
+   * For non-string T, attempts JSON.parse. Returns undefined on parse failure.
+   * @private
+   */
+  private coerceSSEEvent<T>(raw: { event: string; data: string; id?: string }): SSEEvent<T> | undefined {
+    // When T is string (default), just return as-is
+    // We can't check T at runtime, so we try JSON.parse and fall back
+    let data: T;
+    try {
+      data = JSON.parse(raw.data) as T;
+    } catch {
+      // JSON parse failed — use raw string as data
+      data = raw.data as unknown as T;
+    }
+
+    return {
+      event: raw.event,
+      data,
+      ...(raw.id !== undefined ? { id: raw.id } : {}),
+    };
+  }
+
+  /**
+   * Compose two AbortSignals into one that aborts when either does.
+   * Uses AbortSignal.any() if available, falls back to manual listener.
+   * @private
+   */
+  private composeAbortSignals(a: AbortSignal, b: AbortSignal): AbortSignal {
+    // Use AbortSignal.any() if available (Node 20+, modern browsers)
+    if ('any' in AbortSignal && typeof AbortSignal.any === 'function') {
+      return AbortSignal.any([a, b]);
+    }
+
+    // Fallback: create a new controller that aborts when either signal aborts
+    const controller = new AbortController();
+    const onAbort = () => controller.abort();
+
+    if (a.aborted || b.aborted) {
+      controller.abort();
+    } else {
+      a.addEventListener('abort', onAbort, { once: true });
+      b.addEventListener('abort', onAbort, { once: true });
+    }
+
+    return controller.signal;
+  }
+
+  /**
+   * Check if we should retry an SSE connection
+   * @private
+   */
+  private shouldRetrySSE(retryCount: number, maxRetries: number): boolean {
+    if (maxRetries === -1) return true; // Infinite retries
+    return retryCount < maxRetries;
+  }
+
+  /**
+   * Calculate retry delay with exponential backoff and optional jitter
+   * @private
+   */
+  private calculateSSERetryDelay(
+    baseDelay: number,
+    maxDelay: number,
+    useJitter: boolean
+  ): number {
+    let delay = Math.min(baseDelay, maxDelay);
+    if (useJitter) {
+      // ±20% jitter
+      const jitterFactor = 0.8 + Math.random() * 0.4;
+      delay = Math.round(delay * jitterFactor);
+    }
+    return delay;
+  }
+
+  /**
+   * Sleep that can be aborted via AbortSignal
+   * @private
+   */
+  private abortableSleep(ms: number, signal: AbortSignal): Promise<void> {
+    if (signal.aborted) return Promise.resolve();
+    return new Promise<void>((resolve) => {
+      const timer = setTimeout(() => {
+        signal.removeEventListener('abort', onAbort);
+        resolve();
+      }, ms);
+
+      const onAbort = () => {
+        clearTimeout(timer);
+        resolve();
+      };
+
+      signal.addEventListener('abort', onAbort, { once: true });
+    });
+  }
+
+  /**
+   * Parse Retry-After header value into milliseconds
+   * @private
+   */
+  private parseRetryAfter(headers: Headers): number | undefined {
+    const retryAfter = headers.get('Retry-After');
+    if (!retryAfter) return undefined;
+
+    // Try seconds (integer)
+    const seconds = parseInt(retryAfter, 10);
+    if (!isNaN(seconds) && String(seconds) === retryAfter.trim()) {
+      return seconds * 1000;
+    }
+
+    // Try HTTP-date
+    const date = Date.parse(retryAfter);
+    if (!isNaN(date)) {
+      return Math.max(0, date - Date.now());
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Safely read response body for error context
+   * @private
+   */
+  private async safeReadBody(response: Response): Promise<unknown> {
+    try {
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        return text;
+      }
+    } catch {
+      return undefined;
+    }
+  }
+
   /**
    * Build RequestInit from method, body, and options
    * Auto-stringifies object/array bodies and sets Content-Type
    * @private
    */
-  private buildRequestInit(method: string, body?: unknown, options?: FejRequestOptions): RequestInit {
+  private buildRequestInit(method: string, body?: unknown, options?: FejBaseOptions & { cache?: RequestCache; redirect?: RequestRedirect }): RequestInit {
     const init: RequestInit = { method };
 
     // Pass through standard fetch options

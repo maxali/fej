@@ -76,17 +76,50 @@ Config options:
 }
 ```
 
-### FejRequestOptions
+### FejBaseOptions
 
+Shared transport options for both HTTP and SSE:
 ```typescript
 {
   headers?: HeadersInit;
   signal?: AbortSignal;
+  credentials?: RequestCredentials;
+  mode?: RequestMode;
   params?: Record<string, string | number | boolean>;  // Query params
+}
+```
+
+### FejRequestOptions (extends FejBaseOptions)
+
+```typescript
+{
+  cache?: RequestCache;
+  redirect?: RequestRedirect;
   timeout?: number;
   responseType?: 'json' | 'text' | 'blob' | 'arrayBuffer';
-  cache?: RequestCache;
-  credentials?: RequestCredentials;
+}
+```
+
+### SSE Streaming
+
+| Method | Signature | Returns |
+|--------|-----------|---------|
+| `api.sse<T>(url, opts?)` | SSE stream | `AsyncGenerator<SSEEvent<T>>` |
+
+#### SSEEvent<T>
+{ event: string, data: T, id?: string }
+
+#### SSEOptions (extends FejBaseOptions)
+{ method?, body?, reconnect?, maxRetries?, retryDelay?, terminators?, onOpen? }
+
+#### Usage
+```typescript
+// OpenAI streaming
+for await (const event of api.sse<ChatChunk>('/chat/completions', {
+  method: 'POST',
+  body: { model: 'gpt-4', stream: true, messages },
+})) {
+  process.stdout.write(event.data.choices[0].delta.content);
 }
 ```
 
@@ -94,6 +127,7 @@ Config options:
 
 - `FejError` — base error class
 - `FejHttpError` — HTTP 4xx/5xx errors (has `.status`, `.statusText`, `.data`, `.headers`)
+- `FejSSEError` — SSE-specific errors (has `.response`)
 - `FejTimeoutError` — timeout errors
 - `FejRetryError` — retry exhaustion errors
 
