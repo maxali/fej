@@ -10,7 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const BUNDLE_SIZE_LIMIT_KB = 16; // Updated from 15KB for v1.2 convenience API
+const BUNDLE_SIZE_LIMIT_KB = 22; // Updated from 16KB for v1.3 SSE streaming support
 const BUNDLE_SIZE_LIMIT_BYTES = BUNDLE_SIZE_LIMIT_KB * 1024;
 
 function getFileSize(filePath) {

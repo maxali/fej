@@ -223,3 +223,135 @@ export function verifyExecutionOrder(traces: MiddlewareExecutionTrace[]): boolea
   }
   return true;
 }
+
+/**
+ * Controller for an SSE stream, allowing tests to push chunks,
+ * close the stream, or trigger an error.
+ */
+export interface SSEStreamController {
+  push(chunk: string): void;
+  close(): void;
+  error(err: Error): void;
+}
+
+/**
+ * Creates a mock fetch that returns an SSE (text/event-stream) Response
+ * with a controllable ReadableStream. Tests push SSE text chunks via
+ * the returned `stream` controller.
+ */
+export function createMockSSEFetch(options?: {
+  status?: number;
+  statusText?: string;
+  headers?: Record<string, string>;
+}): {
+  mock: typeof fetch;
+  calls: MockFetchCall[];
+  stream: SSEStreamController;
+} {
+  const calls: MockFetchCall[] = [];
+  const encoder = new TextEncoder();
+
+  let streamController: ReadableStreamDefaultController<Uint8Array>;
+
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      streamController = controller;
+    },
+  });
+
+  const stream: SSEStreamController = {
+    push(chunk: string) {
+      streamController.enqueue(encoder.encode(chunk));
+    },
+    close() {
+      streamController.close();
+    },
+    error(err: Error) {
+      streamController.error(err);
+    },
+  };
+
+  const mergedHeaders: Record<string, string> = {
+    'Content-Type': 'text/event-stream',
+    ...options?.headers,
+  };
+
+  const mock = async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
+    calls.push({ input, init });
+
+    return new Response(body, {
+      status: options?.status ?? 200,
+      statusText: options?.statusText ?? 'OK',
+      headers: new Headers(mergedHeaders),
+    });
+  };
+
+  return { mock: mock as typeof fetch, calls, stream };
+}
+
+/**
+ * Creates a mock fetch for SSE reconnection testing. Each fetch call
+ * produces a new ReadableStream and SSEStreamController, pushed into the
+ * `streams` array so tests can control each connection independently.
+ */
+export function createMultiResponseMockSSEFetch(options?: {
+  status?: number;
+  statusText?: string;
+  headers?: Record<string, string>;
+  responseFactory?: (callIndex: number) => {
+    status?: number;
+    statusText?: string;
+    headers?: Record<string, string>;
+  };
+}): {
+  mock: typeof fetch;
+  calls: MockFetchCall[];
+  streams: SSEStreamController[];
+} {
+  const calls: MockFetchCall[] = [];
+  const streams: SSEStreamController[] = [];
+  const encoder = new TextEncoder();
+
+  const mock = async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
+    const callIndex = calls.length;
+    calls.push({ input, init });
+
+    let streamController: ReadableStreamDefaultController<Uint8Array>;
+
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        streamController = controller;
+      },
+    });
+
+    const stream: SSEStreamController = {
+      push(chunk: string) {
+        streamController.enqueue(encoder.encode(chunk));
+      },
+      close() {
+        streamController.close();
+      },
+      error(err: Error) {
+        streamController.error(err);
+      },
+    };
+
+    streams.push(stream);
+
+    const factoryOverrides = options?.responseFactory?.(callIndex);
+
+    const mergedHeaders: Record<string, string> = {
+      'Content-Type': 'text/event-stream',
+      ...options?.headers,
+      ...factoryOverrides?.headers,
+    };
+
+    return new Response(body, {
+      status: factoryOverrides?.status ?? options?.status ?? 200,
+      statusText: factoryOverrides?.statusText ?? options?.statusText ?? 'OK',
+      headers: new Headers(mergedHeaders),
+    });
+  };
+
+  return { mock: mock as typeof fetch, calls, streams };
+}

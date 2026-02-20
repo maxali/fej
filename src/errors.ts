@@ -151,3 +151,38 @@ export class FejHttpError extends FejError {
     Object.setPrototypeOf(this, FejHttpError.prototype);
   }
 }
+
+/**
+ * Error thrown for SSE-specific failures (connection, protocol errors)
+ *
+ * @example
+ * ```typescript
+ * import { createFej, FejSSEError } from 'fej';
+ *
+ * const api = createFej();
+ * try {
+ *   for await (const event of api.sse('/stream')) {
+ *     console.log(event.data);
+ *   }
+ * } catch (error) {
+ *   if (error instanceof FejSSEError) {
+ *     console.error('SSE error:', error.message);
+ *     console.error('Status:', error.response?.status);
+ *   }
+ * }
+ * ```
+ *
+ * @public
+ */
+export class FejSSEError extends FejError {
+  constructor(
+    message: string,
+    /** The HTTP response that caused the failure (for header/status inspection) */
+    public readonly response?: Response,
+    context?: FejContext
+  ) {
+    super(message, undefined, context, response?.status);
+    this.name = 'FejSSEError';
+    Object.setPrototypeOf(this, FejSSEError.prototype);
+  }
+}
